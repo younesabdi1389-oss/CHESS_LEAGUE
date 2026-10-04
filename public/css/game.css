@@ -1,0 +1,112 @@
+/* استایل‌های مخصوص صفحه‌ی بازی شطرنج */
+
+.game-body{
+  justify-content:center;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(91,141,239,.14), transparent 55%),
+    radial-gradient(circle at 85% 100%, rgba(160,108,242,.14), transparent 55%),
+    var(--bg);
+}
+.game-wrap{
+  max-width:480px; margin:30px auto; padding:22px 18px; width:100%;
+  background:var(--card); border:1px solid var(--border); border-radius:20px;
+  box-shadow:0 18px 50px rgba(0,0,0,.35);
+}
+html[data-theme="light"] .game-wrap{ box-shadow:0 18px 40px rgba(30,40,80,.12); }
+.back-link{ color:var(--text2); font-size:13px; display:inline-block; }
+.game-h1{
+  font-size:21px; margin-bottom:16px; font-weight:800; text-align:center;
+  background:linear-gradient(135deg,var(--blue),var(--purple));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+
+/* ---------- انتخاب حالت بازی (دو نفره / با بات) ---------- */
+.mode-bar{ display:flex; gap:8px; margin-bottom:10px; }
+.mode-bar button{
+  flex:1; background:var(--card2); border:1px solid var(--border); color:var(--text2);
+  padding:11px 6px; border-radius:12px; font-size:12.5px; font-weight:700; cursor:pointer;
+  transition:.15s;
+}
+.mode-bar button.active{
+  background:linear-gradient(135deg,var(--blue),var(--purple)); color:#fff; border-color:transparent;
+  box-shadow:0 6px 16px rgba(91,141,239,.35);
+}
+
+.diff-bar{ display:flex; gap:8px; margin-bottom:14px; transition:opacity .15s; }
+.diff-bar button{
+  flex:1; background:var(--card2); border:1px solid var(--border); color:var(--text2);
+  padding:9px 6px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer;
+  transition:.15s;
+}
+.diff-bar button.active{ background:var(--gold); color:#171a21; border-color:var(--gold); box-shadow:0 6px 14px rgba(242,184,75,.35); }
+.diff-bar.disabled{ opacity:.35; pointer-events:none; }
+
+.status-bar{
+  text-align:center; background:var(--card2); border:1px solid var(--border);
+  border-radius:12px; padding:11px; margin-bottom:14px; font-weight:800; font-size:14px;
+  letter-spacing:.2px; transition:.2s;
+}
+.status-bar.check{ color:var(--gold); border-color:var(--gold); box-shadow:0 0 0 3px #f2b84b22; }
+.status-bar.over{ color:var(--green); border-color:var(--green); box-shadow:0 0 0 3px #22c55e22; }
+.status-bar.thinking{ color:var(--blue); border-color:var(--blue); box-shadow:0 0 0 3px #5b8def22; }
+
+/* ---------- صفحه‌ی شطرنج ---------- */
+.board{
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  grid-template-rows:repeat(8,1fr);
+  border:5px solid var(--card2); border-radius:12px; overflow:hidden;
+  aspect-ratio:1; width:100%;
+  box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 0 0 2px var(--border);
+}
+.sq{
+  display:flex; align-items:center; justify-content:center;
+  font-size:clamp(20px,6vw,32px); line-height:1; cursor:pointer; user-select:none; position:relative;
+  transition:background .12s;
+}
+.sq.light{ background:var(--sq-light); }
+.sq.dark{ background:var(--sq-dark); }
+.sq.selected{ box-shadow: inset 0 0 0 3px var(--blue); background:color-mix(in srgb, var(--blue) 18%, var(--sq-light)); }
+.sq.legal::after{
+  content:""; position:absolute; width:24%; height:24%; border-radius:50%;
+  background:var(--gold); opacity:.7; pointer-events:none;
+  box-shadow:0 0 10px rgba(242,184,75,.7);
+}
+.sq.legal-capture{ box-shadow: inset 0 0 0 3px var(--gold); }
+.sq.in-check{ background:#ff4d6d66 !important; animation:pulseCheck 1s ease-in-out infinite; }
+@keyframes pulseCheck{ 0%,100%{filter:brightness(1);} 50%{filter:brightness(1.25);} }
+
+/* رنگ مهره‌ها: مستقل از حالت روز/شب همیشه خوانا باشن */
+.piece-w{ color:#fbfbfd; text-shadow:0 1px 1px rgba(0,0,0,.75), 0 0 2px rgba(0,0,0,.5); filter:drop-shadow(0 2px 2px rgba(0,0,0,.25)); }
+.piece-b{ color:#14151a; text-shadow:0 1px 1px rgba(255,255,255,.4); filter:drop-shadow(0 2px 2px rgba(0,0,0,.15)); }
+
+.controls{ display:flex; justify-content:center; margin:18px 0; }
+.controls button{
+  background:linear-gradient(135deg,var(--blue),var(--purple)); color:#fff; border:none; border-radius:12px;
+  padding:11px 26px; font-size:13px; font-weight:800; cursor:pointer;
+  box-shadow:0 6px 18px rgba(91,141,239,.35); transition:transform .12s;
+}
+.controls button:hover{ transform:translateY(-2px); }
+
+.history-card{ margin-top:10px; }
+.history-list{
+  font-size:13px; color:var(--text2); line-height:1.9; max-height:140px; overflow-y:auto;
+}
+
+/* ---------- پنجره‌ی انتخاب مهره هنگام ترفیع سرباز ---------- */
+.modal-overlay{
+  position:fixed; inset:0; background:#000a; display:flex;
+  align-items:center; justify-content:center; z-index:200; padding:16px;
+}
+.modal-overlay.hidden{ display:none; }
+.promo-modal{
+  background:var(--card); border:1px solid var(--border); border-radius:14px;
+  padding:22px; text-align:center; box-shadow:var(--shadow); max-width:300px;
+}
+.promo-modal h3{ margin-bottom:16px; font-size:13.5px; font-weight:700; }
+.promo-choices{ display:flex; gap:10px; justify-content:center; }
+.promo-choices button{
+  width:54px; height:54px; font-size:28px; border-radius:10px; border:1px solid var(--border);
+  background:var(--card2); cursor:pointer; color:var(--text);
+}
+.promo-choices button:hover{ background:var(--blue); color:#fff; }

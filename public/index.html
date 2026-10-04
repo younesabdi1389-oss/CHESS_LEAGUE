@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chess League | داشبورد</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="overlay" id="overlay"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><div class="ic">♞</div>Chess League</div>
+    <nav class="nav">
+      <a href="index.html" class="active">🏠 خانه</a>
+      <a href="game.html">♟️ بازی (محلی / با بات)</a>
+      <a href="online.html">🌐 بازی آنلاین (زنده)</a>
+      <a href="league.html">🏆 لیگ ۴ نفره</a>
+      <a href="leaderboard.html">📊 جدول امتیازات</a>
+      <a href="history.html">📜 تاریخچه بازی‌ها</a>
+      <a href="profile.html">👤 پروفایل</a>
+      <a href="settings.html">⚙️ تنظیمات</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="hamburger" id="hamburgerBtn">☰</button>
+        <div>
+          <h1 id="welcomeText">سلام 👋</h1>
+          <p>وضعیت لیگ شما به‌روزه</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="theme-toggle" id="themeToggleBtn">🌙</button>
+        <div class="user-chip">
+          <div class="avatar" id="avatarLetter">?</div>
+          <span id="usernameText">کاربر</span>
+          <span class="dot"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card blue"><div class="num" id="statPlayers">-</div><div class="lbl">بازیکنان لیگ</div></div>
+      <div class="stat-card green"><div class="num" id="statGames">-</div><div class="lbl">بازی‌های انجام‌شده</div></div>
+      <div class="stat-card gold"><div class="num" id="statPoints">-</div><div class="lbl">امتیاز شما</div></div>
+      <div class="stat-card purple"><div class="num" id="statRank">-</div><div class="lbl">جایگاه فعلی</div></div>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <div class="card">
+          <h2>جدول امتیازات لیگ</h2>
+          <table>
+            <thead>
+              <tr><th>#</th><th>بازیکن</th><th>بازی</th><th>برد</th><th>مساوی</th><th>باخت</th><th>امتیاز</th></tr>
+            </thead>
+            <tbody id="leagueTableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <h2>بازی‌های اخیر</h2>
+          <div id="recentGames"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <h2>دعوت دوستان <span class="demo-badge">به‌زودی فعال می‌شه</span></h2>
+          <div class="invite-box">
+            <span id="inviteLink">در حال بارگذاری...</span>
+            <button id="copyInviteBtn">کپی لینک</button>
+          </div>
+          <p class="invite-note">فعلاً لینک دعوت مخصوص خودکار نداریم؛ ولی وقتی این سایت آنلاین بشه، کافیه آدرس سرور رو به دوستات بدی — هر کی وارد بشه یه بار اسمشو وارد می‌کنه و خودکار عضو همین لیگ می‌شه. لینک دعوت اختصاصی (برای اتاق‌های بازی آنلاین) تو فاز بعدی اضافه می‌شه.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/theme.js"></script>
+  <script src="js/nav-common.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

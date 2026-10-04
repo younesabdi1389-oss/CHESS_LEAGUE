@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>بازی آنلاین | Chess League</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/game.css">
+</head>
+<body class="game-body">
+
+  <div class="game-wrap">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+      <a href="index.html" class="back-link">→ بازگشت به داشبورد</a>
+      <button class="theme-toggle" id="themeToggleBtn">🌙</button>
+    </div>
+
+    <h1 class="game-h1">🌐 بازی آنلاین زنده</h1>
+
+    <!-- لابی: ساخت یا پیوستن به اتاق -->
+    <div class="card" id="lobbyCard">
+      <h2>شروع بازی</h2>
+      <input id="nameInput" class="input" placeholder="اسمت رو بنویس" style="width:100%; margin-bottom:12px">
+      <button class="btn" id="createRoomBtn" style="width:100%; margin-bottom:14px">+ ساخت اتاق جدید</button>
+      <div style="display:flex; gap:8px">
+        <input id="joinCodeInput" class="input" placeholder="کد اتاق دوستت" style="text-transform:uppercase">
+        <button class="btn secondary" id="joinRoomBtn">پیوستن</button>
+      </div>
+      <div id="lobbyMsg" style="margin-top:10px; font-size:12px; color:var(--text2)"></div>
+    </div>
+
+    <!-- منتظر پیوستن حریف -->
+    <div class="card" id="waitingCard" style="display:none; text-align:center">
+      <h2 style="justify-content:center">منتظر حریف...</h2>
+      <p class="page-intro">این کد رو برای دوستت بفرست تا بهت ملحق بشه:</p>
+      <div style="font-size:30px; font-weight:800; letter-spacing:6px; margin:14px 0;" id="roomCodeDisplay"></div>
+      <button class="btn secondary" id="copyRoomCodeBtn">کپی کد</button>
+    </div>
+
+    <!-- صفحه‌ی بازی -->
+    <div id="playArea" style="display:none">
+      <div class="status-bar" id="statusBar">نوبت: سفید</div>
+      <div class="board" id="board"></div>
+      <div class="controls">
+        <button id="resignBtn">تسلیم شدن</button>
+      </div>
+      <div class="card history-card">
+        <h2>تاریخچه حرکات</h2>
+        <div id="historyList" class="history-list">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay hidden" id="promoModal">
+    <div class="promo-modal">
+      <h3>مهره‌ی موردنظر برای ترفیع رو انتخاب کن</h3>
+      <div class="promo-choices">
+        <button data-p="q" title="وزیر">♛</button>
+        <button data-p="r" title="رخ">♜</button>
+        <button data-p="b" title="فیل">♝</button>
+        <button data-p="n" title="اسب">♞</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/online.js"></script>
+</body>
+</html>

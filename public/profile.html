@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>پروفایل | Chess League</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="overlay" id="overlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><div class="ic">♞</div>Chess League</div>
+    <nav class="nav">
+      <a href="index.html">🏠 خانه</a>
+      <a href="game.html">♟️ بازی (محلی / با بات)</a>
+      <a href="online.html">🌐 بازی آنلاین (زنده)</a>
+      <a href="league.html">🏆 لیگ ۴ نفره</a>
+      <a href="leaderboard.html">📊 جدول امتیازات</a>
+      <a href="history.html">📜 تاریخچه بازی‌ها</a>
+      <a href="profile.html" class="active">👤 پروفایل</a>
+      <a href="settings.html">⚙️ تنظیمات</a>
+    </nav>
+  </aside>
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="hamburger" id="hamburgerBtn">☰</button>
+        <div><h1>👤 پروفایل</h1><p>اطلاعات حساب شما</p></div>
+      </div>
+      <button class="theme-toggle" id="themeToggleBtn">🌙</button>
+    </div>
+
+    <div class="card">
+      <div class="profile-card">
+        <div class="profile-avatar">ی</div>
+        <div>
+          <div style="font-size:16px; font-weight:800;">یونس</div>
+          <div style="font-size:12.5px; color:var(--text2); margin-top:3px;">عضو لیگ «دوستان شطرنج» <span class="demo-badge">داده نمایشی</span></div>
+        </div>
+      </div>
+      <div class="stats-grid" style="margin-top:16px">
+        <div class="stat-card blue"><div class="num">۳</div><div class="lbl">بازی انجام‌شده</div></div>
+        <div class="stat-card green"><div class="num">۳</div><div class="lbl">برد</div></div>
+        <div class="stat-card gold"><div class="num">۹</div><div class="lbl">امتیاز</div></div>
+        <div class="stat-card purple"><div class="num">۱</div><div class="lbl">رتبه فعلی</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>ویرایش پروفایل</h2>
+      <p class="page-intro">ورود/ثبت‌نام و ویرایش واقعی پروفایل بعد از ساخته‌شدن سیستم حساب کاربری فعال می‌شه. فعلاً این دکمه فقط نمایشیه.</p>
+      <button class="btn secondary" id="editProfileBtn">ویرایش اطلاعات</button>
+    </div>
+  </main>
+
+  <script src="js/theme.js"></script>
+  <script src="js/nav-common.js"></script>
+  <script>
+    document.getElementById("editProfileBtn").addEventListener("click", () => {
+      alert("این قابلیت هنوز ساخته نشده — بعد از ساخت سیستم حساب کاربری فعال می‌شه.");
+    });
+  </script>
+</body>
+</html>

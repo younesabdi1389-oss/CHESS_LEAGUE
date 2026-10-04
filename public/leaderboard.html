@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>جدول امتیازات | Chess League</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="overlay" id="overlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><div class="ic">♞</div>Chess League</div>
+    <nav class="nav">
+      <a href="index.html">🏠 خانه</a>
+      <a href="game.html">♟️ بازی (محلی / با بات)</a>
+      <a href="online.html">🌐 بازی آنلاین (زنده)</a>
+      <a href="league.html">🏆 لیگ ۴ نفره</a>
+      <a href="leaderboard.html" class="active">📊 جدول امتیازات</a>
+      <a href="history.html">📜 تاریخچه بازی‌ها</a>
+      <a href="profile.html">👤 پروفایل</a>
+      <a href="settings.html">⚙️ تنظیمات</a>
+    </nav>
+  </aside>
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="hamburger" id="hamburgerBtn">☰</button>
+        <div><h1>📊 جدول امتیازات</h1><p>رتبه‌بندی کامل لیگ</p></div>
+      </div>
+      <button class="theme-toggle" id="themeToggleBtn">🌙</button>
+    </div>
+
+    <div class="card">
+      <h2>جدول کامل</h2>
+      <table>
+        <thead><tr><th>#</th><th>بازیکن</th><th>بازی</th><th>برد</th><th>مساوی</th><th>باخت</th><th>امتیاز</th></tr></thead>
+        <tbody id="fullLeagueTableBody"><tr><td colspan="7">در حال بارگذاری...</td></tr></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script src="js/theme.js"></script>
+  <script src="js/nav-common.js"></script>
+  <script>
+    const myName = localStorage.getItem("cl-player-name") || "";
+    async function load() {
+      const body = document.getElementById("fullLeagueTableBody");
+      try {
+        const res = await fetch("/api/leaderboard");
+        if (!res.ok) throw new Error();
+        const table = await res.json();
+        body.innerHTML = table.length
+          ? table.map(row => `
+            <tr class="${row.name === myName ? "me" : ""}">
+              <td>${row.rank}</td><td>${row.name}</td><td>${row.played}</td>
+              <td>${row.won}</td><td>${row.draw}</td><td>${row.lost}</td><td>${row.points}</td>
+            </tr>`).join("")
+          : `<tr><td colspan="7" style="color:var(--text2)">هنوز هیچ بازیکن/بازی‌ای ثبت نشده</td></tr>`;
+      } catch (err) {
+        body.innerHTML = `<tr><td colspan="7" style="color:var(--text2)">دیتابیس هنوز وصل نیست</td></tr>`;
+      }
+    }
+    load();
+  </script>
+</body>
+</html>

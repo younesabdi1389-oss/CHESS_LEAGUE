@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>بازی شطرنج | Chess League</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/game.css">
+</head>
+<body class="game-body">
+
+  <div class="game-wrap">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+      <div>
+        <a href="index.html" class="back-link">→ بازگشت به داشبورد</a>
+        <a href="online.html" class="back-link" style="margin-right:12px">🌐 بازی آنلاین</a>
+      </div>
+      <button class="theme-toggle" id="themeToggleBtn">🌙</button>
+    </div>
+
+    <h1 class="game-h1">♟️ بازی شطرنج</h1>
+
+    <div class="mode-bar">
+      <button id="modeLocalBtn" class="active">👥 دو نفره (محلی)</button>
+      <button id="modeBotBtn">🤖 بازی با بات</button>
+    </div>
+    <div class="diff-bar disabled" id="diffBar">
+      <button data-diff="easy" class="active">ایزی</button>
+      <button data-diff="medium">میدیوم</button>
+      <button data-diff="hard">هارد</button>
+    </div>
+
+    <div class="status-bar" id="statusBar">نوبت: سفید</div>
+
+    <div class="board" id="board"></div>
+
+    <div class="controls">
+      <button id="resetBtn">شروع دوباره</button>
+    </div>
+
+    <div class="card history-card">
+      <h2>تاریخچه حرکات</h2>
+      <div id="historyList" class="history-list">—</div>
+    </div>
+
+    <div class="card" id="submitResultCard" style="display:none">
+      <h2>ثبت نتیجه در لیگ</h2>
+      <p class="page-intro">بازی تموم شد! اگه این یه بازی واقعی بین دو نفر بود، نتیجه رو اینجا ثبت کن تا تو جدول امتیازات لیگ اعمال بشه.</p>
+      <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap">
+        <input id="whiteNameInput" class="input" placeholder="اسم بازیکن سفید">
+        <input id="blackNameInput" class="input" placeholder="اسم بازیکن سیاه">
+      </div>
+      <button class="btn" id="submitResultBtn">ثبت نتیجه</button>
+      <div id="submitResultMsg" style="margin-top:8px; font-size:12px; color:var(--text2)"></div>
+    </div>
+  </div>
+
+  <!-- پنجره‌ی انتخاب مهره هنگام ترفیع سرباز -->
+  <div class="modal-overlay hidden" id="promoModal">
+    <div class="promo-modal">
+      <h3>سرباز شما به آخر زمین رسید؛ به چه مهره‌ای ترفیع پیدا کنه؟</h3>
+      <div class="promo-choices">
+        <button data-p="q" title="وزیر">♛</button>
+        <button data-p="r" title="رخ">♜</button>
+        <button data-p="b" title="فیل">♝</button>
+        <button data-p="n" title="اسب">♞</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- chess.js: تمام قوانین شطرنج (کیش، مات، روخ، آن‌پاسان، ترفیع) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/bot.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
