@@ -1,52 +1,79 @@
-/* ---------- فونت فارسی (وزیرمتن) ---------- */
+/* ---------- فونت فارسی (وزیرمتن) — همون فونت قبلی پروژه ---------- */
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap');
 
-/* ---------- متغیرهای رنگ: حالت تاریک (پیش‌فرض) ---------- */
+/* ---------- پالت چوبی: حالت تاریک (پیش‌فرض) ---------- */
 :root{
-  --bg:#0a0c10; --card:#151822; --card2:#1b1f2b;
-  --blue:#5b8def; --green:#22c55e; --gold:#f2b84b; --purple:#a06cf2; --danger:#ff4d6d;
-  --text:#eef1f7; --text2:#8b93a5; --border:#232834;
-  --sq-light:#2b3040; --sq-dark:#171a21;
-  --shadow: 0 6px 20px rgba(0,0,0,.25);
+  --bg:#16100a; --card:#241911; --card2:#302116;
+  --blue:#c58140; --purple:#8c5628; --gold:#e3b862; --green:#8aae6e; --danger:#d4593f;
+  --text:#f5e9d3; --text2:#bda688; --border:#47311f;
+  --sq-light:#ecd5a8; --sq-dark:#a8713d;
+  --accent-grad:linear-gradient(135deg,#c58140,#8c5628);
+  --shadow:0 6px 18px rgba(0,0,0,.35);
 }
-/* ---------- حالت روشن ---------- */
+/* ---------- حالت روشن: کاغذ/چوب روشن ---------- */
 html[data-theme="light"]{
-  --bg:#f3f5fa; --card:#ffffff; --card2:#eef1f8;
-  --text:#1a2030; --text2:#5c6578; --border:#e1e5f0;
-  --sq-light:#f1f3fb; --sq-dark:#c8cfe4;
-  --shadow: 0 6px 18px rgba(30,40,80,.08);
+  --bg:#f1e6d0; --card:#fbf3e2; --card2:#f1e3c8;
+  --blue:#a8672a; --purple:#7a4a24; --gold:#a97a22; --green:#5d8447; --danger:#b84630;
+  --text:#2d1d11; --text2:#7a6247; --border:#dcc8a4;
+  --accent-grad:linear-gradient(135deg,#b4722f,#7a4a24);
+  --shadow:0 6px 16px rgba(80,50,20,.12);
 }
 
 *{box-sizing:border-box; margin:0; padding:0;}
-html{transition:background .2s;}
+html{-webkit-tap-highlight-color:transparent;}
 body{
   font-family:'Vazirmatn', Tahoma, sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  display:flex;
-  min-height:100vh;
-  transition:background .2s, color .2s;
+  background:var(--bg); color:var(--text);
+  display:flex; min-height:100vh; min-height:100dvh;
 }
 a{color:inherit; text-decoration:none;}
-button{font-family:inherit;}
+button{font-family:inherit; touch-action:manipulation;}
+:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
 
-/* ---------- منوی کناری ---------- */
+/* ---------- منوی کشویی ---------- */
 .sidebar{
-  width:230px; background:var(--card); border-left:1px solid var(--border);
-  padding:20px 14px; flex-shrink:0; position:sticky; top:0; height:100vh; z-index:95;
+  position:fixed; top:0; right:0; height:100vh; height:100dvh; width:min(290px,84vw);
+  background:var(--card); border-left:1px solid var(--border);
+  padding:20px 14px; z-index:300; overflow-y:auto;
+  transform:translateX(104%); transition:transform .2s cubic-bezier(.2,.8,.2,1);
+  box-shadow:-12px 0 34px rgba(0,0,0,.4);
 }
+.sidebar.open{ transform:translateX(0); }
+.overlay{
+  position:fixed; inset:0; background:rgba(10,6,2,.6); z-index:250;
+  opacity:0; pointer-events:none; transition:opacity .2s;
+}
+.overlay.show{ opacity:1; pointer-events:auto; }
+
 .brand{display:flex; align-items:center; gap:10px; font-weight:800; font-size:17px; padding:0 6px 20px;}
 .brand .ic{
-  width:32px; height:32px; border-radius:9px;
-  background:linear-gradient(135deg,var(--blue),var(--purple));
-  display:flex; align-items:center; justify-content:center;
+  width:34px; height:34px; border-radius:10px; background:var(--accent-grad); color:#fff6e4;
+  display:flex; align-items:center; justify-content:center; font-size:18px;
 }
 .nav a{
-  display:flex; align-items:center; gap:10px; padding:11px 12px;
-  border-radius:10px; color:var(--text2); font-size:13.5px; margin-bottom:4px; font-weight:500;
+  display:flex; align-items:center; gap:12px; padding:11px 12px;
+  border-radius:11px; color:var(--text2); font-size:13.5px; margin-bottom:4px; font-weight:600;
+  transition:background .12s, color .12s;
 }
+.nav a svg{flex-shrink:0;}
 .nav a:hover{ background:var(--card2); color:var(--text); }
-.nav a.active{background:var(--card2); color:var(--text); font-weight:700; border-right:3px solid var(--blue);}
+.nav a.active{background:var(--card2); color:var(--gold); font-weight:800; box-shadow:inset -3px 0 0 var(--gold);}
+
+.menu-btn{
+  position:fixed; top:14px; right:14px; z-index:120; display:none; align-items:center; gap:7px;
+  background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:11px;
+  padding:8px 14px; font-size:13px; font-weight:700; cursor:pointer; box-shadow:var(--shadow);
+}
+.menu-btn:hover{ border-color:var(--gold); }
+@media(min-width:768px){ .menu-btn{display:flex;} }
+
+/* دسکتاپ: صفحه‌های داشبورد منو رو ثابت کنار صفحه نشون می‌دن */
+@media(min-width:768px){
+  body.has-dock .sidebar.dockable{
+    position:sticky; transform:none; box-shadow:none; flex-shrink:0; width:240px; z-index:20; transition:none;
+  }
+  body.has-dock .overlay{display:none;}
+}
 
 /* ---------- محتوای اصلی ---------- */
 .main{flex:1; padding:22px 26px; min-width:0;}
@@ -59,35 +86,45 @@ button{font-family:inherit;}
   border:1px solid var(--border); border-radius:999px; padding:6px 14px 6px 6px; font-size:13px;
 }
 .avatar{
-  width:30px; height:30px; border-radius:50%;
-  background:linear-gradient(135deg,var(--blue),var(--purple));
+  width:30px; height:30px; border-radius:50%; background:var(--accent-grad);
   display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; color:#fff;
 }
 .dot{width:8px; height:8px; border-radius:50%; background:var(--green); display:inline-block; margin-left:4px;}
+.avatar-sm{width:24px; height:24px; font-size:13px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff;}
 
 .theme-toggle{
   background:var(--card); border:1px solid var(--border); color:var(--text);
   width:38px; height:38px; border-radius:10px; font-size:16px; cursor:pointer; flex-shrink:0;
 }
-.theme-toggle:hover{ border-color:var(--blue); }
+.theme-toggle:hover{ border-color:var(--gold); }
+
+@keyframes fadeUp{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
 
 /* ---------- کارت‌های آماری ---------- */
 .stats-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px;}
-.stat-card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; box-shadow:var(--shadow);}
-.stat-card .num{font-size:22px; font-weight:800;}
-.stat-card .lbl{font-size:12px; color:var(--text2); margin-top:4px;}
+.stat-card{
+  background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px;
+  box-shadow:var(--shadow); display:flex; align-items:center; gap:12px; transition:transform .15s;
+}
+.stat-card:hover{ transform:translateY(-2px); }
+.stat-card .stat-icon{ width:40px; height:40px; border-radius:11px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:19px; }
+.stat-card .num{font-size:21px; font-weight:800;}
+.stat-card .lbl{font-size:11.5px; color:var(--text2); margin-top:2px;}
+.stat-card.blue .stat-icon{background:#c5814022; color:var(--blue);}
+.stat-card.green .stat-icon{background:#8aae6e22; color:var(--green);}
+.stat-card.gold .stat-icon{background:#e3b86222; color:var(--gold);}
+.stat-card.purple .stat-icon{background:#b0703a22; color:var(--purple);}
 .stat-card.blue .num{color:var(--blue);}
 .stat-card.green .num{color:var(--green);}
 .stat-card.gold .num{color:var(--gold);}
-.stat-card.purple .num{color:var(--purple);}
+.stat-card.purple .num{color:var(--text);}
 
 /* ---------- کارت‌های عمومی ---------- */
 .grid2{display:grid; grid-template-columns:1.3fr 1fr; gap:16px;}
 .card{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:18px; margin-bottom:16px; box-shadow:var(--shadow);}
 .card h2{font-size:15px; font-weight:800; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;}
-.card h2 .badge{font-size:11px; background:#22c55e22; color:var(--green); padding:3px 10px; border-radius:999px; font-weight:700;}
-.demo-badge{font-size:10.5px; background:#f2b84b22; color:var(--gold); padding:3px 10px; border-radius:999px; font-weight:700;}
-
+.card h2 .badge{font-size:11px; background:#8aae6e22; color:var(--green); padding:3px 10px; border-radius:999px; font-weight:700;}
+.demo-badge{font-size:10.5px; background:#e3b86222; color:var(--gold); padding:3px 10px; border-radius:999px; font-weight:700;}
 .page-intro{color:var(--text2); font-size:13px; margin-bottom:18px; line-height:1.9;}
 
 /* ---------- جدول ---------- */
@@ -102,9 +139,9 @@ tr.me td{color:var(--gold); font-weight:800;}
 .game-row{display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); font-size:13px;}
 .game-row:last-child{border-bottom:none;}
 .result{font-size:11px; padding:3px 9px; border-radius:999px; font-weight:800;}
-.result.win{background:#22c55e22; color:var(--green);}
-.result.loss{background:#ff4d6d22; color:var(--danger);}
-.result.draw{background:#8b93a522; color:var(--text2);}
+.result.win{background:#8aae6e22; color:var(--green);}
+.result.loss{background:#d4593f22; color:var(--danger);}
+.result.draw{background:#bda68822; color:var(--text2);}
 
 /* ---------- دعوت دوستان ---------- */
 .invite-box{
@@ -112,48 +149,60 @@ tr.me td{color:var(--gold); font-weight:800;}
   border:1px solid var(--border); border-radius:12px; padding:10px 14px; font-size:12px; color:var(--text2);
 }
 .invite-box span{ word-break:break-all; }
-.invite-box button{
-  background:var(--blue); color:#fff; border:none; border-radius:8px;
-  padding:7px 14px; font-size:12px; font-weight:700; cursor:pointer; flex-shrink:0;
-}
+.invite-box button{ background:var(--accent-grad); color:#fff; border:none; border-radius:8px; padding:7px 14px; font-size:12px; font-weight:700; cursor:pointer; flex-shrink:0; }
 .invite-note{font-size:11.5px; color:var(--text2); margin-top:8px; line-height:1.8;}
 
-/* ---------- فرم‌ها / دکمه‌های عمومی ---------- */
-.btn{background:var(--blue); color:#fff; border:none; border-radius:10px; padding:10px 18px; font-size:13px; font-weight:700; cursor:pointer;}
+/* ---------- فرم‌ها / دکمه‌ها ---------- */
+.btn{background:var(--accent-grad); color:#fff8ea; border:none; border-radius:10px; padding:10px 18px; font-size:13px; font-weight:700; cursor:pointer; transition:filter .12s, transform .12s;}
 .btn:hover{ filter:brightness(1.08); }
+.btn:active{ transform:scale(.98); }
 .btn.secondary{background:var(--card2); color:var(--text); border:1px solid var(--border);}
 .btn:disabled{opacity:.5; cursor:not-allowed;}
+.btn.loading{position:relative; color:transparent !important; pointer-events:none;}
+.btn.loading::after{
+  content:""; position:absolute; inset:0; margin:auto; width:16px; height:16px; border-radius:50%;
+  border:2px solid rgba(255,248,234,.4); border-top-color:#fff8ea; animation:spin .7s linear infinite;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
 .input{
   padding:9px 12px; border-radius:8px; border:1px solid var(--border);
   background:var(--card2); color:var(--text); font-family:inherit; font-size:13px; flex:1; min-width:120px;
 }
+.input:focus{ outline:none; border-color:var(--gold); }
 
 .profile-card{display:flex; align-items:center; gap:16px; margin-bottom:10px;}
-.profile-avatar{
-  width:64px; height:64px; border-radius:50%; font-size:24px;
-  background:linear-gradient(135deg,var(--blue),var(--purple)); color:#fff;
-  display:flex; align-items:center; justify-content:center; font-weight:800; flex-shrink:0;
-}
+.profile-avatar{ width:64px; height:64px; border-radius:50%; font-size:24px; background:var(--accent-grad); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; flex-shrink:0; }
 .setting-row{display:flex; align-items:center; justify-content:space-between; padding:13px 0; border-bottom:1px solid var(--border); gap:10px;}
 .setting-row:last-child{border-bottom:none;}
 .setting-row .title{font-size:13.5px; font-weight:700;}
 .setting-row .desc{font-size:11.5px; color:var(--text2); margin-top:2px;}
 .switch-soon{font-size:10.5px; color:var(--text2); background:var(--card2); border:1px solid var(--border); padding:4px 10px; border-radius:999px;}
 
-/* ---------- حالت موبایل ---------- */
-.hamburger{display:none; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:8px 12px; font-size:16px; cursor:pointer;}
-.overlay{display:none; position:fixed; inset:0; background:#000a; z-index:90;}
+/* ---------- نوار پایین (موبایل) ---------- */
+.bottom-nav{
+  display:none; position:fixed; bottom:0; right:0; left:0; z-index:200;
+  background:var(--card); border-top:1px solid var(--border);
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));
+  justify-content:space-around; align-items:center;
+}
+.bottom-nav a, .bottom-nav button{
+  display:flex; flex-direction:column; align-items:center; gap:2px; flex:1; min-width:0;
+  color:var(--text2); font-size:10px; padding:5px 2px; border-radius:10px; font-weight:700;
+  background:none; border:none; cursor:pointer;
+}
+.bottom-nav a.active{ color:var(--gold); background:var(--card2); }
+.bottom-nav .bn-icon{ display:flex; }
 
 @media(max-width:900px){
   .stats-grid{grid-template-columns:repeat(2,1fr);}
   .grid2{grid-template-columns:1fr;}
 }
 @media(max-width:767px){
-  .sidebar{position:fixed; right:0; top:0; height:100%; z-index:100; transform:translateX(100%); transition:.25s;}
-  .sidebar.open{transform:translateX(0);}
-  .overlay.show{display:block;}
-  .hamburger{display:block;}
-  .main{padding:16px;}
-  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .bottom-nav{display:flex;}
+  .main{padding:16px; padding-bottom:90px;}
+  .game-wrap{margin-bottom:90px;}
   .profile-card{flex-direction:column; text-align:center;}
+}
+@media(prefers-reduced-motion:reduce){
+  *{ animation-duration:.01ms !important; transition-duration:.01ms !important; }
 }

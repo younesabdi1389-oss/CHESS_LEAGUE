@@ -2,7 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>بازی شطرنج | Chess League</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/game.css">
@@ -10,32 +10,41 @@
 <body class="game-body">
 
   <div class="game-wrap">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
-      <div>
-        <a href="index.html" class="back-link">→ بازگشت به داشبورد</a>
-        <a href="online.html" class="back-link" style="margin-right:12px">🌐 بازی آنلاین</a>
+    <div class="top-row">
+      <a href="index.html" class="back-link">→ بازگشت به داشبورد</a>
+      <div class="top-actions">
+        <button class="sound-btn" data-sound-toggle type="button">🔊 صدا روشن</button>
+        <button class="theme-toggle" id="themeToggleBtn" type="button">🌙</button>
       </div>
-      <button class="theme-toggle" id="themeToggleBtn">🌙</button>
     </div>
 
     <h1 class="game-h1">♟️ بازی شطرنج</h1>
 
     <div class="mode-bar">
-      <button id="modeLocalBtn" class="active">👥 دو نفره (محلی)</button>
-      <button id="modeBotBtn">🤖 بازی با بات</button>
+      <button id="modeLocalBtn" class="active" type="button">👥 دو نفره (محلی)</button>
+      <button id="modeBotBtn" type="button">🤖 بازی با بات</button>
     </div>
     <div class="diff-bar disabled" id="diffBar">
-      <button data-diff="easy" class="active">ایزی</button>
-      <button data-diff="medium">میدیوم</button>
-      <button data-diff="hard">هارد</button>
+      <button data-diff="easy" class="active" type="button">ایزی</button>
+      <button data-diff="medium" type="button">میدیوم</button>
+      <button data-diff="hard" type="button">هارد</button>
     </div>
 
-    <div class="status-bar" id="statusBar">نوبت: سفید</div>
+    <div class="timer-toggle">
+      <button id="timerOffBtn" class="active" type="button">⏱️ بدون تایمر</button>
+      <button id="timerOnBtn" type="button">⏱️ با تایمر (۱۰ دقیقه)</button>
+    </div>
+    <div class="clock-row" id="clockRow" style="display:none">
+      <div class="clock-box" id="clockBlack">10:00<div class="clock-label">سیاه</div></div>
+      <div class="clock-box" id="clockWhite">10:00<div class="clock-label">سفید</div></div>
+    </div>
+
+    <div class="status-bar" id="statusBar" aria-live="polite">نوبت: سفید</div>
 
     <div class="board" id="board"></div>
 
     <div class="controls">
-      <button id="resetBtn">شروع دوباره</button>
+      <button id="resetBtn" type="button">شروع دوباره</button>
     </div>
 
     <div class="card history-card">
@@ -47,10 +56,10 @@
       <h2>ثبت نتیجه در لیگ</h2>
       <p class="page-intro">بازی تموم شد! اگه این یه بازی واقعی بین دو نفر بود، نتیجه رو اینجا ثبت کن تا تو جدول امتیازات لیگ اعمال بشه.</p>
       <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap">
-        <input id="whiteNameInput" class="input" placeholder="اسم بازیکن سفید">
-        <input id="blackNameInput" class="input" placeholder="اسم بازیکن سیاه">
+        <input id="whiteNameInput" class="input" placeholder="اسم بازیکن سفید" maxlength="20">
+        <input id="blackNameInput" class="input" placeholder="اسم بازیکن سیاه" maxlength="20">
       </div>
-      <button class="btn" id="submitResultBtn">ثبت نتیجه</button>
+      <button class="btn" id="submitResultBtn" type="button">ثبت نتیجه</button>
       <div id="submitResultMsg" style="margin-top:8px; font-size:12px; color:var(--text2)"></div>
     </div>
   </div>
@@ -60,17 +69,22 @@
     <div class="promo-modal">
       <h3>سرباز شما به آخر زمین رسید؛ به چه مهره‌ای ترفیع پیدا کنه؟</h3>
       <div class="promo-choices">
-        <button data-p="q" title="وزیر">♛</button>
-        <button data-p="r" title="رخ">♜</button>
-        <button data-p="b" title="فیل">♝</button>
-        <button data-p="n" title="اسب">♞</button>
+        <button data-p="q" title="وزیر" type="button">♛</button>
+        <button data-p="r" title="رخ" type="button">♜</button>
+        <button data-p="b" title="فیل" type="button">♝</button>
+        <button data-p="n" title="اسب" type="button">♞</button>
       </div>
     </div>
   </div>
 
-  <!-- chess.js: تمام قوانین شطرنج (کیش، مات، روخ، آن‌پاسان، ترفیع) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <!-- chess.js: اول از سرور خودمون (بدون CDN)، اگه نبود از همون CDN قبلی -->
+  <script src="/vendor/chess.js"></script>
+  <script>window.Chess||document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"><\/script>')</script>
   <script src="js/theme.js"></script>
+  <script src="js/nav-common.js"></script>
+  <script src="js/board-render.js"></script>
+  <script src="js/chess-clock.js"></script>
+  <script src="js/sounds.js"></script>
   <script src="js/bot.js"></script>
   <script src="js/game.js"></script>
 </body>

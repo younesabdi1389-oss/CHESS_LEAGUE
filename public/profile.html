@@ -7,58 +7,97 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="overlay" id="overlay"></div>
-  <aside class="sidebar" id="sidebar">
-    <div class="brand"><div class="ic">♞</div>Chess League</div>
-    <nav class="nav">
-      <a href="index.html">🏠 خانه</a>
-      <a href="game.html">♟️ بازی (محلی / با بات)</a>
-      <a href="online.html">🌐 بازی آنلاین (زنده)</a>
-      <a href="league.html">🏆 لیگ ۴ نفره</a>
-      <a href="leaderboard.html">📊 جدول امتیازات</a>
-      <a href="history.html">📜 تاریخچه بازی‌ها</a>
-      <a href="profile.html" class="active">👤 پروفایل</a>
-      <a href="settings.html">⚙️ تنظیمات</a>
-    </nav>
-  </aside>
   <main class="main">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:10px">
-        <button class="hamburger" id="hamburgerBtn">☰</button>
-        <div><h1>👤 پروفایل</h1><p>اطلاعات حساب شما</p></div>
+        <div><h1>👤 پروفایل</h1><p>اطلاعات و آواتار تو</p></div>
       </div>
       <button class="theme-toggle" id="themeToggleBtn">🌙</button>
     </div>
 
     <div class="card">
       <div class="profile-card">
-        <div class="profile-avatar">ی</div>
+        <div id="profileAvatarBox"></div>
         <div>
-          <div style="font-size:16px; font-weight:800;">یونس</div>
-          <div style="font-size:12.5px; color:var(--text2); margin-top:3px;">عضو لیگ «دوستان شطرنج» <span class="demo-badge">داده نمایشی</span></div>
+          <div id="profileNameText" style="font-size:16px; font-weight:800;">—</div>
+          <div style="font-size:12.5px; color:var(--text2); margin-top:3px;">عضو لیگ</div>
         </div>
       </div>
       <div class="stats-grid" style="margin-top:16px">
-        <div class="stat-card blue"><div class="num">۳</div><div class="lbl">بازی انجام‌شده</div></div>
-        <div class="stat-card green"><div class="num">۳</div><div class="lbl">برد</div></div>
-        <div class="stat-card gold"><div class="num">۹</div><div class="lbl">امتیاز</div></div>
-        <div class="stat-card purple"><div class="num">۱</div><div class="lbl">رتبه فعلی</div></div>
+        <div class="stat-card blue"><div class="num" id="pGames">-</div><div class="lbl">بازی انجام‌شده</div></div>
+        <div class="stat-card green"><div class="num" id="pWon">-</div><div class="lbl">برد</div></div>
+        <div class="stat-card gold"><div class="num" id="pPoints">-</div><div class="lbl">امتیاز</div></div>
+        <div class="stat-card purple"><div class="num" id="pRank">-</div><div class="lbl">رتبه فعلی</div></div>
       </div>
     </div>
 
     <div class="card">
-      <h2>ویرایش پروفایل</h2>
-      <p class="page-intro">ورود/ثبت‌نام و ویرایش واقعی پروفایل بعد از ساخته‌شدن سیستم حساب کاربری فعال می‌شه. فعلاً این دکمه فقط نمایشیه.</p>
-      <button class="btn secondary" id="editProfileBtn">ویرایش اطلاعات</button>
+      <h2>انتخاب آواتار</h2>
+      <p class="page-intro">یکی از این مهره‌ها رو به‌عنوان آواتارت انتخاب کن — همه‌جا (جدول امتیازات، پروفایل) همین دیده می‌شه.</p>
+      <div id="avatarPicker" style="display:flex; gap:10px; flex-wrap:wrap"></div>
     </div>
   </main>
 
   <script src="js/theme.js"></script>
   <script src="js/nav-common.js"></script>
+  <script src="js/avatars.js"></script>
   <script>
-    document.getElementById("editProfileBtn").addEventListener("click", () => {
-      alert("این قابلیت هنوز ساخته نشده — بعد از ساخت سیستم حساب کاربری فعال می‌شه.");
-    });
+    const PLAYER_KEY = "cl-player-name";
+    const myName = localStorage.getItem(PLAYER_KEY) || "";
+    document.getElementById("profileNameText").textContent = myName || "مهمان";
+
+    function renderAvatarBox(index) {
+      document.getElementById("profileAvatarBox").innerHTML = avatarHTML(index, "profile-avatar");
+    }
+
+    function renderPicker(selectedIndex) {
+      const box = document.getElementById("avatarPicker");
+      box.innerHTML = AVATAR_PRESETS.map((a, i) => `
+        <button data-i="${i}" style="width:52px; height:52px; border-radius:50%; border:3px solid ${i === selectedIndex ? "var(--blue)" : "transparent"};
+          background:${a.color}; font-size:22px; cursor:pointer;">${a.icon}</button>
+      `).join("");
+      box.querySelectorAll("button").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const i = parseInt(btn.dataset.i);
+          setSavedAvatar(i);
+          renderAvatarBox(i);
+          renderPicker(i);
+          if (myName) {
+            try {
+              await fetch("/api/players", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: myName, avatar: i }),
+              });
+            } catch (err) {}
+          }
+        });
+      });
+    }
+
+    async function loadStats() {
+      renderAvatarBox(getSavedAvatar());
+      renderPicker(getSavedAvatar());
+      if (!myName) return;
+      try {
+        const res = await fetch(`/api/dashboard?name=${encodeURIComponent(myName)}`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        document.getElementById("pGames").textContent = data.stats.gamesPlayed;
+        document.getElementById("pPoints").textContent = data.stats.points;
+        document.getElementById("pRank").textContent = data.stats.rank;
+        const me = data.leagueTable.find((p) => p.isMe);
+        document.getElementById("pWon").textContent = me ? me.won : 0;
+        if (data.avatar !== undefined && data.avatar !== null) {
+          setSavedAvatar(data.avatar);
+          renderAvatarBox(data.avatar);
+          renderPicker(data.avatar);
+        }
+      } catch (err) {
+        // دیتابیس وصل نیست؛ فقط آواتار محلی رو نشون می‌دیم
+      }
+    }
+    loadStats();
   </script>
 </body>
 </html>

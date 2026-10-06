@@ -1,18 +1,13 @@
 # Chess League
 
-وب‌اپ شطرنج آنلاین برای یک لیگ ۴ نفره دوستانه.
+وب‌اپ شطرنج آنلاین برای یک لیگ دوستانه.
 
-## اجرای پروژه (Phase 1)
+## اجرا
 
 ```bash
-npm install
-npm run dev
+npm install   # فقط همون وابستگی‌های قبلی (express, pg, dotenv, socket.io, chess.js)
+npm start
 ```
 
-بعد مرورگر رو باز کن و برو به:
-
-```
-http://localhost:3000
-```
-
-باید پیام "Chess League server is running" رو ببینی.
+بعد برو به `http://localhost:3000`. فایل `.env` (با `DATABASE_URL`) مثل قبل لازمه.
+برای جزئیات تغییرات آخر، فایل `CHANGES.md` رو ببین.

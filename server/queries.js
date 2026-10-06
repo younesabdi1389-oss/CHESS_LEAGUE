@@ -5,22 +5,31 @@
 
 const { pool } = require("./db");
 
-async function findOrCreatePlayer(name) {
+async function findOrCreatePlayer(name, avatar) {
   const trimmed = (name || "").trim();
   if (!trimmed) throw new Error("نام بازیکن نمی‌تونه خالی باشه");
 
-  const existing = await pool.query("SELECT id, name FROM players WHERE name = $1", [trimmed]);
-  if (existing.rows.length) return existing.rows[0];
+  const existing = await pool.query("SELECT id, name, avatar FROM players WHERE name = $1", [trimmed]);
+  if (existing.rows.length) {
+    if (avatar !== undefined && avatar !== null) {
+      const updated = await pool.query(
+        "UPDATE players SET avatar = $1 WHERE name = $2 RETURNING id, name, avatar",
+        [avatar, trimmed]
+      );
+      return updated.rows[0];
+    }
+    return existing.rows[0];
+  }
 
   const inserted = await pool.query(
-    "INSERT INTO players (name) VALUES ($1) RETURNING id, name",
-    [trimmed]
+    "INSERT INTO players (name, avatar) VALUES ($1, $2) RETURNING id, name, avatar",
+    [trimmed, avatar || 0]
   );
   return inserted.rows[0];
 }
 
 async function listPlayers() {
-  const r = await pool.query("SELECT id, name FROM players ORDER BY name ASC");
+  const r = await pool.query("SELECT id, name, avatar FROM players ORDER BY name ASC");
   return r.rows;
 }
 
@@ -49,7 +58,7 @@ async function getLeaderboard() {
 
   const stats = {};
   players.forEach((p) => {
-    stats[p.name] = { name: p.name, played: 0, won: 0, draw: 0, lost: 0, points: 0 };
+    stats[p.name] = { name: p.name, avatar: p.avatar || 0, played: 0, won: 0, draw: 0, lost: 0, points: 0 };
   });
 
   games.forEach((g) => {

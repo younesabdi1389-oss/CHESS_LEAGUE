@@ -1,27 +1,42 @@
 // ===================================================================
-// مدیریت حالت روز/شب (Light/Dark) برای کل سایت.
-// انتخاب کاربر توی localStorage ذخیره می‌شه تا در بازدیدهای بعدی حفظ بشه.
-// این فایل باید تو <head> یا همون اول <body> همه‌ی صفحات لود بشه.
+// تم روز/شب + ذخیره‌ی امن تنظیمات (CLPrefs) برای کل سایت.
+// این فایل باید اولین اسکریپت هر صفحه باشه.
 // ===================================================================
+
+window.CLPrefs = {
+  get(key, fallback) {
+    try {
+      const v = localStorage.getItem(key);
+      return v === null ? fallback : v;
+    } catch (e) {
+      return fallback;
+    }
+  },
+  set(key, value) {
+    try {
+      localStorage.setItem(key, String(value));
+    } catch (e) {
+      /* حالت خصوصی مرورگر؛ مشکلی نیست */
+    }
+  },
+};
 
 (function () {
   const STORAGE_KEY = "cl-theme";
-  const saved = localStorage.getItem(STORAGE_KEY) || "dark";
-  document.documentElement.setAttribute("data-theme", saved);
+  document.documentElement.setAttribute("data-theme", CLPrefs.get(STORAGE_KEY, "dark"));
 
   function updateIcon() {
     const btn = document.getElementById("themeToggleBtn");
     if (!btn) return;
-    const current = document.documentElement.getAttribute("data-theme");
-    btn.textContent = current === "dark" ? "🌙" : "☀️";
-    btn.title = current === "dark" ? "رفتن به حالت روشن" : "رفتن به حالت تاریک";
+    const dark = document.documentElement.getAttribute("data-theme") === "dark";
+    btn.textContent = dark ? "🌙" : "☀️";
+    btn.title = dark ? "رفتن به حالت روشن" : "رفتن به حالت تاریک";
   }
 
   function toggleTheme() {
-    const current = document.documentElement.getAttribute("data-theme");
-    const next = current === "dark" ? "light" : "dark";
+    const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", next);
-    localStorage.setItem(STORAGE_KEY, next);
+    CLPrefs.set(STORAGE_KEY, next);
     updateIcon();
   }
 

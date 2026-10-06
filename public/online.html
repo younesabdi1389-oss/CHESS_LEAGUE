@@ -2,7 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>بازی آنلاین | Chess League</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/game.css">
@@ -10,21 +10,35 @@
 <body class="game-body">
 
   <div class="game-wrap">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+    <div class="top-row">
       <a href="index.html" class="back-link">→ بازگشت به داشبورد</a>
-      <button class="theme-toggle" id="themeToggleBtn">🌙</button>
+      <div class="top-actions">
+        <button class="sound-btn" data-sound-toggle type="button">🔊 صدا روشن</button>
+        <button class="theme-toggle" id="themeToggleBtn" type="button">🌙</button>
+      </div>
     </div>
 
     <h1 class="game-h1">🌐 بازی آنلاین زنده</h1>
 
+    <div class="conn-banner show" id="connBanner" role="status" aria-live="polite">در حال اتصال به سرور…</div>
+
     <!-- لابی: ساخت یا پیوستن به اتاق -->
     <div class="card" id="lobbyCard">
       <h2>شروع بازی</h2>
-      <input id="nameInput" class="input" placeholder="اسمت رو بنویس" style="width:100%; margin-bottom:12px">
-      <button class="btn" id="createRoomBtn" style="width:100%; margin-bottom:14px">+ ساخت اتاق جدید</button>
+      <input id="nameInput" class="input" placeholder="اسمت رو بنویس" maxlength="20" style="width:100%; margin-bottom:12px">
+      <div class="timer-toggle">
+        <button id="timerOffBtn" class="active" type="button">⏱️ بدون تایمر</button>
+        <button id="timerOnBtn" type="button">⏱️ با تایمر (۱۰ دقیقه)</button>
+      </div>
+      <p class="timer-note">این انتخاب موقع «ساخت اتاق» اثر داره. نفر دوم قبل از ورود می‌بینه که بازی با تایمره یا بدون تایمر.</p>
+      <button class="btn" id="createRoomBtn" type="button" style="width:100%; margin-bottom:14px" disabled>+ ساخت اتاق جدید</button>
       <div style="display:flex; gap:8px">
-        <input id="joinCodeInput" class="input" placeholder="کد اتاق دوستت" style="text-transform:uppercase">
-        <button class="btn secondary" id="joinRoomBtn">پیوستن</button>
+        <input id="joinCodeInput" class="input" placeholder="کد اتاق دوستت" maxlength="8" autocapitalize="characters" style="text-transform:uppercase">
+        <button class="btn secondary" id="joinRoomBtn" type="button" disabled>پیوستن</button>
+      </div>
+      <div class="join-preview" id="previewBox" style="display:none">
+        <div id="previewText"></div>
+        <button class="btn" id="confirmJoinBtn" type="button">ورود به بازی</button>
       </div>
       <div id="lobbyMsg" style="margin-top:10px; font-size:12px; color:var(--text2)"></div>
     </div>
@@ -32,18 +46,54 @@
     <!-- منتظر پیوستن حریف -->
     <div class="card" id="waitingCard" style="display:none; text-align:center">
       <h2 style="justify-content:center">منتظر حریف...</h2>
+      <span class="timer-badge" id="waitTimerBadge"></span>
       <p class="page-intro">این کد رو برای دوستت بفرست تا بهت ملحق بشه:</p>
-      <div style="font-size:30px; font-weight:800; letter-spacing:6px; margin:14px 0;" id="roomCodeDisplay"></div>
-      <button class="btn secondary" id="copyRoomCodeBtn">کپی کد</button>
+      <div style="font-size:30px; font-weight:800; letter-spacing:6px; margin:14px 0; direction:ltr" id="roomCodeDisplay"></div>
+      <button class="btn secondary" id="copyRoomCodeBtn" type="button">کپی کد</button>
+      <p class="timer-note" style="margin-top:12px">اگه صفحه رو رفرش کنی یا اینترنتت قطع بشه، اتاق حفظ می‌شه.</p>
     </div>
 
     <!-- صفحه‌ی بازی -->
     <div id="playArea" style="display:none">
-      <div class="status-bar" id="statusBar">نوبت: سفید</div>
-      <div class="board" id="board"></div>
-      <div class="controls">
-        <button id="resignBtn">تسلیم شدن</button>
+      <div style="text-align:center">
+        <span class="timer-badge" id="timerBadge"></span>
+        <div class="timer-note" id="vsLine" style="margin:0 0 8px"></div>
       </div>
+      <div class="clock-row" id="clockRow" style="display:none">
+        <div class="clock-box" id="clockBlack">10:00<div class="clock-label">سیاه</div></div>
+        <div class="clock-box" id="clockWhite">10:00<div class="clock-label">سفید</div></div>
+      </div>
+
+      <div class="status-bar" id="statusBar" aria-live="polite">نوبت: سفید</div>
+      <div class="board" id="board"></div>
+      <div class="emoji-bar">
+        <button data-emoji="👍" type="button">👍</button>
+        <button data-emoji="😂" type="button">😂</button>
+        <button data-emoji="😮" type="button">😮</button>
+        <button data-emoji="🔥" type="button">🔥</button>
+        <button data-emoji="😢" type="button">😢</button>
+        <button data-emoji="♟️" type="button">♟️</button>
+      </div>
+
+      <div class="controls">
+        <button id="resignBtn" class="danger" type="button">تسلیم شدن</button>
+        <button id="backToLobbyBtn" type="button" style="display:none">بازی جدید</button>
+      </div>
+
+      <div class="card">
+        <h2>گفتگو</h2>
+        <div id="chatLog" class="chat-log" aria-live="polite"></div>
+        <div class="chat-emojis">
+          <button type="button">😀</button><button type="button">😂</button><button type="button">👏</button>
+          <button type="button">🤝</button><button type="button">🔥</button><button type="button">😎</button>
+          <button type="button">🙏</button><button type="button">👍</button>
+        </div>
+        <div class="chat-row">
+          <input id="chatInput" class="input" placeholder="پیامت رو بنویس..." maxlength="300" autocomplete="off">
+          <button class="btn secondary" id="chatSendBtn" type="button">ارسال</button>
+        </div>
+      </div>
+
       <div class="card history-card">
         <h2>تاریخچه حرکات</h2>
         <div id="historyList" class="history-list">—</div>
@@ -55,17 +105,23 @@
     <div class="promo-modal">
       <h3>مهره‌ی موردنظر برای ترفیع رو انتخاب کن</h3>
       <div class="promo-choices">
-        <button data-p="q" title="وزیر">♛</button>
-        <button data-p="r" title="رخ">♜</button>
-        <button data-p="b" title="فیل">♝</button>
-        <button data-p="n" title="اسب">♞</button>
+        <button data-p="q" title="وزیر" type="button">♛</button>
+        <button data-p="r" title="رخ" type="button">♜</button>
+        <button data-p="b" title="فیل" type="button">♝</button>
+        <button data-p="n" title="اسب" type="button">♞</button>
       </div>
     </div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <!-- chess.js: اول از سرور خودمون (بدون CDN)، اگه نبود از همون CDN قبلی -->
+  <script src="/vendor/chess.js"></script>
+  <script>window.Chess||document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"><\/script>')</script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="js/theme.js"></script>
+  <script src="js/nav-common.js"></script>
+  <script src="js/board-render.js"></script>
+  <script src="js/chess-clock.js"></script>
+  <script src="js/sounds.js"></script>
   <script src="js/online.js"></script>
 </body>
 </html>

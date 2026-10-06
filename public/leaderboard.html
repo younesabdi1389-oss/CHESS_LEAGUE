@@ -7,24 +7,9 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="overlay" id="overlay"></div>
-  <aside class="sidebar" id="sidebar">
-    <div class="brand"><div class="ic">♞</div>Chess League</div>
-    <nav class="nav">
-      <a href="index.html">🏠 خانه</a>
-      <a href="game.html">♟️ بازی (محلی / با بات)</a>
-      <a href="online.html">🌐 بازی آنلاین (زنده)</a>
-      <a href="league.html">🏆 لیگ ۴ نفره</a>
-      <a href="leaderboard.html" class="active">📊 جدول امتیازات</a>
-      <a href="history.html">📜 تاریخچه بازی‌ها</a>
-      <a href="profile.html">👤 پروفایل</a>
-      <a href="settings.html">⚙️ تنظیمات</a>
-    </nav>
-  </aside>
   <main class="main">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:10px">
-        <button class="hamburger" id="hamburgerBtn">☰</button>
         <div><h1>📊 جدول امتیازات</h1><p>رتبه‌بندی کامل لیگ</p></div>
       </div>
       <button class="theme-toggle" id="themeToggleBtn">🌙</button>
@@ -41,8 +26,10 @@
 
   <script src="js/theme.js"></script>
   <script src="js/nav-common.js"></script>
+  <script src="js/avatars.js"></script>
   <script>
     const myName = localStorage.getItem("cl-player-name") || "";
+    function rankBadge(rank){ if(rank===1) return "🥇"; if(rank===2) return "🥈"; if(rank===3) return "🥉"; return rank; }
     async function load() {
       const body = document.getElementById("fullLeagueTableBody");
       try {
@@ -50,9 +37,11 @@
         if (!res.ok) throw new Error();
         const table = await res.json();
         body.innerHTML = table.length
-          ? table.map(row => `
-            <tr class="${row.name === myName ? "me" : ""}">
-              <td>${row.rank}</td><td>${row.name}</td><td>${row.played}</td>
+          ? table.map((row,i) => `
+            <tr class="${row.name === myName ? "me" : ""}" style="animation:fadeUp .35s ease ${i*0.05}s both">
+              <td>${rankBadge(row.rank)}</td>
+              <td style="display:flex; align-items:center; gap:8px; justify-content:center">${avatarHTML(row.avatar||0,"avatar-sm")} ${row.name}</td>
+              <td>${row.played}</td>
               <td>${row.won}</td><td>${row.draw}</td><td>${row.lost}</td><td>${row.points}</td>
             </tr>`).join("")
           : `<tr><td colspan="7" style="color:var(--text2)">هنوز هیچ بازیکن/بازی‌ای ثبت نشده</td></tr>`;

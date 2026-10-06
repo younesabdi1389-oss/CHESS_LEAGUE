@@ -2,73 +2,60 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>تنظیمات | Chess League</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="overlay" id="overlay"></div>
-  <aside class="sidebar" id="sidebar">
-    <div class="brand"><div class="ic">♞</div>Chess League</div>
-    <nav class="nav">
-      <a href="index.html">🏠 خانه</a>
-      <a href="game.html">♟️ بازی (محلی / با بات)</a>
-      <a href="online.html">🌐 بازی آنلاین (زنده)</a>
-      <a href="league.html">🏆 لیگ ۴ نفره</a>
-      <a href="leaderboard.html">📊 جدول امتیازات</a>
-      <a href="history.html">📜 تاریخچه بازی‌ها</a>
-      <a href="profile.html">👤 پروفایل</a>
-      <a href="settings.html" class="active">⚙️ تنظیمات</a>
-    </nav>
-  </aside>
   <main class="main">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:10px">
-        <button class="hamburger" id="hamburgerBtn">☰</button>
-        <div><h1>⚙️ تنظیمات</h1><p>ظاهر و ترجیحات برنامه</p></div>
+        <div><h1>⚙️ تنظیمات</h1><p>ظاهر، صدا و تایمر</p></div>
       </div>
       <button class="theme-toggle" id="themeToggleBtn">🌙</button>
     </div>
 
     <div class="card">
-      <h2>ظاهر برنامه</h2>
-      <div class="setting-row">
-        <div>
-          <div class="title">حالت روشن / تاریک</div>
-          <div class="desc">بین حالت روز و شب جابه‌جا شو؛ انتخابت ذخیره می‌مونه.</div>
-        </div>
-        <button class="btn secondary" id="themeToggleBtnSettings">تغییر حالت</button>
+      <h2>صدای بازی</h2>
+      <p class="page-intro">صدای حرکت مهره، کیش، پایان بازی و اتمام زمان.</p>
+      <button class="btn secondary" data-sound-toggle type="button">🔊 صدا روشن</button>
+    </div>
+
+    <div class="card">
+      <h2>تایمر پیش‌فرض بازی</h2>
+      <p class="page-intro">انتخابت تو صفحه‌ی بازی محلی و ساخت اتاق آنلاین هم اعمال می‌شه.</p>
+      <div class="setting-row" style="border:none; padding:0">
+        <button class="btn secondary" id="timerPrefBtn" type="button">—</button>
       </div>
     </div>
 
     <div class="card">
-      <h2>اعلان‌ها</h2>
-      <div class="setting-row">
-        <div>
-          <div class="title">اعلان شروع بازی جدید</div>
-          <div class="desc">وقتی نوبتت تو یه بازی لیگ می‌رسه بهت خبر بده.</div>
-        </div>
-        <span class="switch-soon">به‌زودی</span>
-      </div>
-      <div class="setting-row">
-        <div>
-          <div class="title">اعلان ایمیلی خلاصه‌ی هفتگی</div>
-          <div class="desc">خلاصه‌ی نتایج لیگ رو هر هفته برات ایمیل کنه.</div>
-        </div>
-        <span class="switch-soon">به‌زودی</span>
-      </div>
+      <h2>حالت روشن / تاریک</h2>
+      <p class="page-intro">انتخابت ذخیره می‌مونه و رو همه‌ی صفحات اعمال می‌شه.</p>
+      <button class="btn secondary" id="themeToggleBtnSettings">تغییر حالت</button>
     </div>
 
     <div class="card">
-      <h2>حساب کاربری</h2>
-      <p class="page-intro">ورود/خروج و مدیریت حساب بعد از ساخته‌شدن سیستم کاربری واقعی اضافه می‌شه.</p>
-      <span class="switch-soon">به‌زودی</span>
+      <h2>موزیک پس‌زمینه</h2>
+      <p class="page-intro">یه آهنگ ساده و آروم موقع گشتن تو داشبورد پخش می‌شه (اختیاریه).</p>
+      <button class="btn secondary" id="musicToggleBtn">پخش موزیک</button>
     </div>
   </main>
 
   <script src="js/theme.js"></script>
   <script src="js/nav-common.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/music.js"></script>
   <script>
+    const timerPrefBtn = document.getElementById("timerPrefBtn");
+    function paintTimerPref() {
+      timerPrefBtn.textContent = CLPrefs.get("cl-timer-pref", "0") === "1" ? "⏱️ با تایمر (۱۰ دقیقه)" : "⏱️ بدون تایمر";
+    }
+    timerPrefBtn.addEventListener("click", () => {
+      CLPrefs.set("cl-timer-pref", CLPrefs.get("cl-timer-pref", "0") === "1" ? "0" : "1");
+      paintTimerPref();
+    });
+    paintTimerPref();
     document.getElementById("themeToggleBtnSettings").addEventListener("click", () => {
       document.getElementById("themeToggleBtn").click();
     });

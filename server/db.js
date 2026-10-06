@@ -26,6 +26,8 @@ async function ensureSchema() {
       created_at TIMESTAMP DEFAULT NOW()
     );
   `);
+  // آواتار: عدد ۰ تا ۷، مهره‌ی پیش‌فرض انتخابی کاربر (ستون جدید رو فقط اگه نبود اضافه می‌کنه)
+  await pool.query(`ALTER TABLE players ADD COLUMN IF NOT EXISTS avatar INT DEFAULT 0;`);
   await pool.query(`
     CREATE TABLE IF NOT EXISTS games (
       id SERIAL PRIMARY KEY,

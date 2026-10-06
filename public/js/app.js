@@ -36,10 +36,17 @@ async function registerPlayer(name) {
   }
 }
 
+function rankBadge(rank) {
+  if (rank === 1) return `🥇`;
+  if (rank === 2) return `🥈`;
+  if (rank === 3) return `🥉`;
+  return rank;
+}
+
 function renderDashboard(data) {
   document.getElementById("welcomeText").textContent = `سلام، ${data.username} 👋`;
   document.getElementById("usernameText").textContent = data.username;
-  document.getElementById("avatarLetter").textContent = (data.username[0] || "?").toUpperCase();
+  document.getElementById("avatarBox").innerHTML = avatarHTML(data.avatar || getSavedAvatar());
 
   document.getElementById("statPlayers").textContent = data.stats.players;
   document.getElementById("statGames").textContent = data.stats.gamesPlayed;
@@ -48,14 +55,21 @@ function renderDashboard(data) {
 
   document.getElementById("inviteLink").textContent = data.inviteLink;
 
+  // انیمیشن ورود کارت‌های آماری (fade-up پشت‌سرهم)
+  document.querySelectorAll(".stat-card").forEach((card, i) => {
+    card.style.animation = "none";
+    void card.offsetWidth;
+    card.style.animation = `fadeUp .4s ease ${i * 0.06}s both`;
+  });
+
   const tbody = document.getElementById("leagueTableBody");
   tbody.innerHTML = data.leagueTable.length
     ? data.leagueTable
         .map(
-          (row) => `
-    <tr class="${row.isMe ? "me" : ""}">
-      <td>${row.rank}</td>
-      <td>${row.name}</td>
+          (row, i) => `
+    <tr class="${row.isMe ? "me" : ""}" style="animation:fadeUp .35s ease ${i * 0.05}s both">
+      <td>${rankBadge(row.rank)}</td>
+      <td style="display:flex; align-items:center; gap:8px; justify-content:center">${avatarHTML(row.avatar || 0, "avatar-sm")} ${row.name}</td>
       <td>${row.played}</td>
       <td>${row.won}</td>
       <td>${row.draw}</td>

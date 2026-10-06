@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>آموزش شطرنج | Chess League</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/game.css">
+  <style>
+    .learn-wrap{ max-width:520px; margin:24px auto; padding:0 16px 100px; }
+    .learn-tabs{ display:flex; gap:8px; margin-bottom:14px; }
+    .learn-tabs button{
+      flex:1; background:var(--card2); border:1px solid var(--border); color:var(--text2);
+      padding:10px; border-radius:10px; font-size:13px; font-weight:800; cursor:pointer;
+    }
+    .learn-tabs button.active{ background:linear-gradient(135deg,var(--blue),var(--purple)); color:#fff; border-color:transparent; }
+    .lesson-progress{ font-size:11.5px; color:var(--text2); text-align:center; margin-bottom:10px; }
+    .lesson-card{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:20px; box-shadow:var(--shadow); min-height:140px; }
+    .lesson-card h2{ font-size:16px; margin-bottom:10px; }
+    .lesson-card p{ font-size:13.5px; line-height:2.1; color:var(--text); }
+    .lesson-board{ max-width:260px; margin:16px auto 4px; }
+    .lesson-nav{ display:flex; gap:8px; margin-top:16px; }
+    .lesson-nav button{
+      flex:1; background:var(--card2); border:1px solid var(--border); color:var(--text);
+      padding:12px; border-radius:10px; font-size:13px; font-weight:800; cursor:pointer;
+    }
+    .lesson-nav button.primary{ background:linear-gradient(135deg,var(--blue),var(--purple)); color:#fff8ea; border-color:transparent; }
+    .lesson-nav button:disabled{ opacity:.4; cursor:not-allowed; }
+    .lesson-hint{ text-align:center; font-size:11px; color:var(--text2); margin-top:10px; }
+  </style>
+</head>
+<body class="game-body">
+  <div class="learn-wrap">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+      <a href="index.html" class="back-link">→ بازگشت به داشبورد</a>
+      <button class="theme-toggle" id="themeToggleBtn">🌙</button>
+    </div>
+
+    <h1 class="game-h1">📖 آموزش شطرنج</h1>
+
+    <div class="learn-tabs">
+      <button id="tabBasic" class="active">🎓 مقدماتی</button>
+      <button id="tabPro">🧠 حرفه‌ای</button>
+    </div>
+
+    <div class="lesson-progress" id="lessonProgress"></div>
+
+    <div class="lesson-card">
+      <h2 id="lessonTitle">—</h2>
+      <p id="lessonText">—</p>
+      <div class="board lesson-board" id="lessonBoard" style="display:none"></div>
+    </div>
+
+    <div class="lesson-nav">
+      <button id="prevBtn">← قبلی</button>
+      <button id="nextBtn" class="primary">بعدی →</button>
+    </div>
+    <div id="lessonDone" style="display:none; text-align:center; margin-top:14px">
+      <a href="game.html" class="btn" style="display:inline-block">♟️ برو یه بازی تمرینی بکن</a>
+    </div>
+    <p class="lesson-hint">می‌تونی کلید Enter رو هم بزنی تا بری درس بعدی</p>
+  </div>
+
+  <script src="/vendor/chess.js"></script>
+  <script>window.Chess||document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"><\/script>')</script>
+  <script src="js/theme.js"></script>
+  <script src="js/nav-common.js"></script>
+  <script src="js/board-render.js"></script>
+  <script src="js/learn-data.js"></script>
+  <script src="js/learn.js"></script>
+</body>
+</html>

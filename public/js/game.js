@@ -1,82 +1,64 @@
 // ===================================================================
 // منطق بازی شطرنج (دو نفره‌ی محلی، یا یک‌نفره مقابل بات)
-// از chess.js برای تمام قوانین استفاده می‌کنیم: کیش، کیش‌مات، پات،
-// روخ‌نشینی، آن‌پاسان و ترفیع سرباز. ما مسئول رسم تخته، گرفتن کلیک‌ها،
-// نمایش پنجره‌ی انتخاب مهره هنگام ترفیع، و صدا زدن بات هستیم.
+// از chess.js برای قوانین استفاده می‌کنیم؛ رسم تخته (با انیمیشن نرم
+// حرکت مهره‌ها) از js/board-render.js مشترکه.
 // ===================================================================
 
-const PIECE_ICONS = {
-  w: { p: "♙", n: "♘", b: "♗", r: "♖", q: "♕", k: "♔" },
-  b: { p: "♟", n: "♞", b: "♝", r: "♜", q: "♛", k: "♚" },
-};
-const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
-
 let game = new Chess();
-let selectedSquare = null;   // مثلاً "e2"
-let legalTargets = [];       // خانه‌هایی که مهره‌ی انتخاب‌شده می‌تونه بره
-let pendingPromotion = null; // { from, to } وقتی منتظر انتخاب مهره‌ی ترفیع هستیم
+let selectedSquare = null;
+let pendingPromotion = null;
+let lastMove = null;
+let confettiFired = false;
 
-let mode = "local";          // "local" یا "bot"
-let difficulty = "easy";     // "easy" | "medium" | "hard" (فقط تو حالت bot)
-let botColor = "b";          // بات همیشه سیاه رو بازی می‌کنه
+let mode = "local"; // "local" یا "bot"
+let difficulty = "easy";
+let botColor = "b";
 
-function squareName(row, col) {
-  return FILES[col] + (8 - row);
-}
+let withTimer = CLPrefs.get("cl-timer-pref", "0") === "1";
+let clock = null;
+let botTimeout = null; // تایمر فکر کردن بات (برای پاک‌سازی موقع شروع دوباره)
+let endSoundPlayed = false;
+let gameEndedByTimeout = null; // رنگی که وقتش تموم شد (بازنده)
+
+const boardEl = document.getElementById("board");
+const renderer = createBoardRenderer(boardEl, {
+  flip: false,
+  onSquareClick: (sq) => onSquareClick(sq),
+});
 
 function render() {
-  const boardEl = document.getElementById("board");
-  boardEl.innerHTML = "";
-  const boardState = game.board();
-
-  let kingInCheckSquare = null;
-  if (game.in_check()) {
-    const turnColor = game.turn();
-    for (let r = 0; r < 8; r++) {
-      for (let c = 0; c < 8; c++) {
-        const p = boardState[r][c];
-        if (p && p.type === "k" && p.color === turnColor) kingInCheckSquare = squareName(r, c);
-      }
-    }
-  }
-
-  for (let r = 0; r < 8; r++) {
-    for (let c = 0; c < 8; c++) {
-      const sq = squareName(r, c);
-      const piece = boardState[r][c];
-      const div = document.createElement("div");
-      div.className = "sq " + ((r + c) % 2 === 0 ? "light" : "dark");
-
-      if (sq === selectedSquare) div.classList.add("selected");
-      if (legalTargets.includes(sq)) div.classList.add(piece ? "legal-capture" : "legal");
-      if (sq === kingInCheckSquare) div.classList.add("in-check");
-
-      if (piece) {
-        const span = document.createElement("span");
-        span.className = "piece-" + piece.color;
-        span.textContent = PIECE_ICONS[piece.color][piece.type];
-        div.appendChild(span);
-      }
-
-      div.addEventListener("click", () => onSquareClick(sq));
-      boardEl.appendChild(div);
-    }
-  }
-
+  renderer.renderBoard(game.board(), {
+    selected: selectedSquare,
+    checkSquare: findCheckSquare(),
+    lastMove,
+  });
   updateStatusBar();
   updateHistory();
   updateResultPanel();
 }
 
+function findCheckSquare() {
+  if (!game.in_check()) return null;
+  const boardState = game.board();
+  const turnColor = game.turn();
+  const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const p = boardState[r][c];
+      if (p && p.type === "k" && p.color === turnColor) return FILES[c] + (8 - r);
+    }
+  }
+  return null;
+}
+
 function onSquareClick(sq) {
-  if (pendingPromotion) return; // تا وقتی مودال باز، کلیک رو تخته بی‌اثره
-  if (mode === "bot" && game.turn() === botColor) return; // نوبت بات، کاربر کلیک نکنه
+  if (pendingPromotion || gameEndedByTimeout) return;
+  if (mode === "bot" && game.turn() === botColor) return;
 
   if (!selectedSquare) {
     const piece = game.get(sq);
     if (piece && piece.color === game.turn()) {
       selectedSquare = sq;
-      legalTargets = game.moves({ square: sq, verbose: true }).map((m) => m.to);
     }
     render();
     return;
@@ -84,7 +66,6 @@ function onSquareClick(sq) {
 
   if (sq === selectedSquare) {
     selectedSquare = null;
-    legalTargets = [];
     render();
     return;
   }
@@ -92,13 +73,10 @@ function onSquareClick(sq) {
   const candidates = game.moves({ square: selectedSquare, verbose: true }).filter((m) => m.to === sq);
 
   if (candidates.length === 0) {
-    // حرکت غیرمجاز؛ شاید کاربر داره مهره‌ی دیگه‌ای از خودش رو انتخاب می‌کنه
     const piece = game.get(sq);
     selectedSquare = null;
-    legalTargets = [];
     if (piece && piece.color === game.turn()) {
       selectedSquare = sq;
-      legalTargets = game.moves({ square: sq, verbose: true }).map((m) => m.to);
     }
     render();
     return;
@@ -106,19 +84,34 @@ function onSquareClick(sq) {
 
   const from = selectedSquare;
   selectedSquare = null;
-  legalTargets = [];
 
   if (candidates[0].promotion) {
-    // این حرکت یعنی سرباز به آخر زمین می‌رسه -> باید کاربر مهره رو انتخاب کنه
     pendingPromotion = { from, to: sq };
     render();
     showPromotionModal();
     return;
   }
 
-  game.move({ from, to: sq });
+  applyMove({ from, to: sq });
+}
+
+// اجرای یک حرکت (انسان یا بات) + صدا + ساعت + رسم
+function applyMove(move) {
+  const result = game.move(move);
+  if (!result) return false;
+  lastMove = { from: result.from, to: result.to };
+  if (game.in_checkmate()) {
+    /* صدای پایان در updateStatusBar پخش می‌شه */
+  } else if (game.in_check()) playCheckSound();
+  else if (result.captured) playCaptureSound();
+  else playMoveSound();
+  if (clock && withTimer) {
+    if (game.game_over()) clock.stop();
+    else clock.switchTurn(game.turn());
+  }
   render();
   maybeTriggerBotMove();
+  return true;
 }
 
 function showPromotionModal() {
@@ -133,46 +126,79 @@ function completePromotion(pieceLetter) {
   const { from, to } = pendingPromotion;
   pendingPromotion = null;
   hidePromotionModal();
-  game.move({ from, to, promotion: pieceLetter });
-  render();
-  maybeTriggerBotMove();
+  applyMove({ from, to, promotion: pieceLetter });
 }
 
 document.querySelectorAll(".promo-choices button").forEach((btn) => {
   btn.addEventListener("click", () => completePromotion(btn.dataset.p));
 });
 
-// بعد از هر حرکت انسان، اگه حالت بازی با بات باشه و نوبت بات برسه، بات حرکت می‌کنه
 function maybeTriggerBotMove() {
   if (mode !== "bot") return;
-  if (game.game_over()) return;
+  if (game.game_over() || gameEndedByTimeout) return;
   if (game.turn() !== botColor) return;
+  if (botTimeout) return; // یه فکر کردن در حال انجامه
 
   const bar = document.getElementById("statusBar");
   bar.classList.add("thinking");
   bar.textContent = "بات داره فکر می‌کنه...";
 
-  setTimeout(() => {
+  const thinkingGame = game; // اگه وسط فکر کردن بازی ریست شد، حرکت قدیمی اعمال نشه
+  botTimeout = setTimeout(() => {
+    botTimeout = null;
+    if (thinkingGame !== game || game.game_over() || gameEndedByTimeout || game.turn() !== botColor) return;
     const m = getBotMove(game, difficulty);
-    if (m) game.move({ from: m.from, to: m.to, promotion: m.promotion || "q" });
-    render();
+    if (m) applyMove({ from: m.from, to: m.to, promotion: m.promotion || "q" });
+    else render();
   }, 450);
+}
+
+function onClockFlag(color) {
+  gameEndedByTimeout = color;
+  selectedSquare = null;
+  playFlagSound();
+  endSoundPlayed = true;
+  render();
 }
 
 function updateStatusBar() {
   const bar = document.getElementById("statusBar");
   bar.classList.remove("check", "over", "thinking");
 
-  if (game.in_checkmate()) {
+  if (gameEndedByTimeout) {
+    const winner = gameEndedByTimeout === "w" ? "سیاه" : "سفید";
+    bar.textContent = `⏱️ اتمام وقت! برنده: ${winner} 🏆`;
+    bar.classList.add("over");
+    if (!confettiFired) {
+      confettiFired = true;
+      burstConfetti();
+    }
+  } else if (game.in_checkmate()) {
     const winner = game.turn() === "w" ? "سیاه" : "سفید";
     bar.textContent = `کیش و مات! برنده: ${winner} 🏆`;
     bar.classList.add("over");
+    if (!endSoundPlayed) {
+      endSoundPlayed = true;
+      playCheckmateSound();
+    }
+    if (!confettiFired) {
+      confettiFired = true;
+      burstConfetti();
+    }
   } else if (game.in_stalemate()) {
     bar.textContent = "پات (Stalemate) — بازی مساوی شد";
     bar.classList.add("over");
+    if (!endSoundPlayed) {
+      endSoundPlayed = true;
+      playCheckSound();
+    }
   } else if (game.in_draw()) {
     bar.textContent = "بازی مساوی شد";
     bar.classList.add("over");
+    if (!endSoundPlayed) {
+      endSoundPlayed = true;
+      playCheckSound();
+    }
   } else if (game.in_check()) {
     const turnFa = game.turn() === "w" ? "سفید" : "سیاه";
     bar.textContent = `کیش! نوبت: ${turnFa}`;
@@ -193,19 +219,15 @@ function updateHistory() {
   let out = "";
   for (let i = 0; i < history.length; i += 2) {
     const num = i / 2 + 1;
-    const white = history[i] || "";
-    const black = history[i + 1] || "";
-    out += `${num}. ${white} ${black}<br>`;
+    out += `${num}. ${history[i] || ""} ${history[i + 1] || ""}<br>`;
   }
   box.innerHTML = out;
 }
 
-// ---------- ثبت نتیجه‌ی بازی محلی دو نفره تو لیگ (دیتابیس واقعی) ----------
 function updateResultPanel() {
   const card = document.getElementById("submitResultCard");
   if (!card) return;
-
-  if (mode === "local" && game.game_over()) {
+  if (mode === "local" && (game.game_over() || gameEndedByTimeout)) {
     card.style.display = "block";
     const savedName = localStorage.getItem("cl-player-name") || "";
     const whiteInput = document.getElementById("whiteNameInput");
@@ -225,12 +247,22 @@ document.getElementById("submitResultBtn").addEventListener("click", async () =>
     msg.textContent = "اسم هر دو بازیکن رو وارد کن.";
     return;
   }
+  if (whiteName === blackName) {
+    msg.textContent = "اسم دو بازیکن نباید یکی باشه.";
+    return;
+  }
+
+  if (btn.disabled) return;
+  btn.disabled = true;
+  btn.classList.add("loading");
 
   let result;
-  if (game.in_checkmate()) {
-    result = game.turn() === "w" ? "black" : "white"; // نوبتِ کیش‌مات‌شده بازنده‌ست
+  if (gameEndedByTimeout) {
+    result = gameEndedByTimeout === "w" ? "black" : "white";
+  } else if (game.in_checkmate()) {
+    result = game.turn() === "w" ? "black" : "white";
   } else {
-    result = "draw"; // پات یا هر نوع مساوی دیگه
+    result = "draw";
   }
 
   try {
@@ -242,27 +274,68 @@ document.getElementById("submitResultBtn").addEventListener("click", async () =>
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "خطای نامشخص");
     msg.textContent = "✅ نتیجه ثبت شد و تو جدول امتیازات لیگ اعمال شد.";
-    btn.disabled = true;
   } catch (err) {
     msg.textContent = "❌ ثبت نشد: " + err.message;
+    btn.disabled = false; // اجازه‌ی تلاش دوباره
+  } finally {
+    btn.classList.remove("loading");
   }
 });
 
 function resetGame() {
+  clearTimeout(botTimeout);
+  botTimeout = null;
   game = new Chess();
   selectedSquare = null;
-  legalTargets = [];
   pendingPromotion = null;
+  lastMove = null;
+  confettiFired = false;
+  endSoundPlayed = false;
+  gameEndedByTimeout = null;
   hidePromotionModal();
-  document.getElementById("submitResultBtn").disabled = false;
+  const sb = document.getElementById("submitResultBtn");
+  sb.disabled = false;
+  sb.classList.remove("loading");
   document.getElementById("submitResultMsg").textContent = "";
+
+  const clockRow = document.getElementById("clockRow");
+  if (withTimer) {
+    clockRow.style.display = "flex";
+    if (!clock) {
+      clock = createLocalClock(
+        { w: document.getElementById("clockWhite"), b: document.getElementById("clockBlack") },
+        onClockFlag
+      );
+    } else {
+      clock.reset();
+    }
+    clock.start("w");
+  } else {
+    clockRow.style.display = "none";
+    if (clock) clock.stop();
+  }
+
   render();
   maybeTriggerBotMove();
 }
 
 document.getElementById("resetBtn").addEventListener("click", resetGame);
 
-// ---------- سوییچ حالت بازی: دو نفره / با بات ----------
+document.getElementById("timerOffBtn").addEventListener("click", function () {
+  withTimer = false;
+  CLPrefs.set("cl-timer-pref", "0");
+  this.classList.add("active");
+  document.getElementById("timerOnBtn").classList.remove("active");
+  resetGame();
+});
+document.getElementById("timerOnBtn").addEventListener("click", function () {
+  withTimer = true;
+  CLPrefs.set("cl-timer-pref", "1");
+  this.classList.add("active");
+  document.getElementById("timerOffBtn").classList.remove("active");
+  resetGame();
+});
+
 const modeLocalBtn = document.getElementById("modeLocalBtn");
 const modeBotBtn = document.getElementById("modeBotBtn");
 const diffBar = document.getElementById("diffBar");
@@ -291,4 +364,7 @@ diffBar.querySelectorAll("button[data-diff]").forEach((btn) => {
   });
 });
 
-render();
+// حالت اولیه‌ی دکمه‌های تایمر از تنظیم ذخیره‌شده
+document.getElementById("timerOnBtn").classList.toggle("active", withTimer);
+document.getElementById("timerOffBtn").classList.toggle("active", !withTimer);
+resetGame();
