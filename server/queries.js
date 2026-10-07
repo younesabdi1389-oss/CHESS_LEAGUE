@@ -33,22 +33,39 @@ async function listPlayers() {
   return r.rows;
 }
 
-async function recordGame(whiteName, blackName, result) {
+async function recordGame(whiteName, blackName, result, moves, reason) {
   const white = whiteName.trim();
   const black = blackName.trim();
   await findOrCreatePlayer(white);
   await findOrCreatePlayer(black);
 
   const r = await pool.query(
-    "INSERT INTO games (white_name, black_name, result) VALUES ($1,$2,$3) RETURNING *",
-    [white, black, result]
+    "INSERT INTO games (white_name, black_name, result, moves, reason) VALUES ($1,$2,$3,$4,$5) RETURNING id, white_name, black_name, result, played_at",
+    [white, black, result, Array.isArray(moves) && moves.length ? JSON.stringify(moves) : null, reason || null]
   );
   return r.rows[0];
 }
 
+// لیست بازی‌ها (بدون خودِ حرکت‌ها تا سبک بمونه؛ فقط می‌گیم حرکت داره یا نه)
 async function getRecentGames(limit = 20) {
-  const r = await pool.query("SELECT * FROM games ORDER BY played_at DESC LIMIT $1", [limit]);
+  const r = await pool.query(
+    "SELECT id, white_name, black_name, result, played_at, reason, (moves IS NOT NULL) AS has_moves FROM games ORDER BY played_at DESC, id DESC LIMIT $1",
+    [limit]
+  );
   return r.rows;
+}
+
+// یک بازی کامل برای تماشا
+async function getGame(id) {
+  const r = await pool.query("SELECT id, white_name, black_name, result, played_at, reason, moves FROM games WHERE id = $1", [id]);
+  const g = r.rows[0];
+  if (!g) return null;
+  try {
+    g.moves = g.moves ? JSON.parse(g.moves) : [];
+  } catch (e) {
+    g.moves = [];
+  }
+  return g;
 }
 
 // جدول امتیازات رو از روی تمام بازی‌های ثبت‌شده محاسبه می‌کنه (نه از یه فیلد جداگانه)
@@ -108,4 +125,4 @@ async function getLeaderboard() {
   return table;
 }
 
-module.exports = { findOrCreatePlayer, listPlayers, recordGame, getRecentGames, getLeaderboard };
+module.exports = { findOrCreatePlayer, listPlayers, recordGame, getRecentGames, getGame, getLeaderboard };

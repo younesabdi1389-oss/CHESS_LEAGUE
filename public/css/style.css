@@ -285,3 +285,52 @@ html[data-theme="light"] .card:hover{ border-color:#c9ae80; }
 .mini-stats span{ font-size:11px; color:var(--text2); }
 @media(max-width:520px){ .mini-stats{ grid-template-columns:repeat(2,1fr); } .hero{ padding:18px; } }
 .mini-stats b .pts{ font-size:19px; }
+
+/* =================================================================
+   لایه‌ی ظاهر ۳: حرکت ورود، براق‌کاری دکمه‌ها، شیشه‌ای، جزئیات
+   (همه سبک: فقط transition/یک‌بار animation، بدون انیمیشن دائمی)
+   ================================================================= */
+.main > *{ animation:fadeUp .45s cubic-bezier(.2,.8,.2,1) both; }
+.main > *:nth-child(2){ animation-delay:.05s; } .main > *:nth-child(3){ animation-delay:.1s; }
+.main > *:nth-child(4){ animation-delay:.15s; } .main > *:nth-child(5){ animation-delay:.2s; }
+.game-wrap{ animation:fadeUp .5s cubic-bezier(.2,.8,.2,1) both; }
+
+.btn, .controls button, .invite-box button{ box-shadow:inset 0 1px 0 rgba(255,255,255,.22), 0 4px 12px rgba(0,0,0,.25); }
+.btn:hover, .controls button:hover{ transform:translateY(-1px); }
+
+.topbar h1{ font-size:21px; letter-spacing:-.2px; }
+.topbar{ padding-bottom:14px; border-bottom:1px solid var(--border); }
+
+.stat-card{ position:relative; overflow:hidden; }
+.stat-card::before{ content:""; position:absolute; top:0; right:0; left:0; height:3px; background:var(--accent-grad); opacity:.85; }
+.stat-card:hover{ box-shadow:0 12px 26px rgba(0,0,0,.4), 0 0 0 1px var(--gold); }
+.stat-card .stat-icon{ box-shadow:inset 0 0 0 1px rgba(255,235,200,.12); }
+
+tbody tr{ transition:background .15s; }
+tbody tr:hover{ background:var(--card2); }
+tr.me td{ background:linear-gradient(90deg, transparent, rgba(227,184,98,.1)); }
+
+.sidebar{ background-image:linear-gradient(180deg, rgba(197,129,64,.1), transparent 30%); }
+.nav a{ transition:background .12s, color .12s, padding-right .15s; }
+.nav a:hover{ padding-right:16px; }
+.brand span{ background:linear-gradient(90deg,var(--gold),#fff1d0); -webkit-background-clip:text; background-clip:text; color:transparent; font-size:18px; }
+
+.bottom-nav{ background:rgba(36,25,17,.88); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); }
+html[data-theme="light"] .bottom-nav{ background:rgba(251,243,226,.9); }
+.bottom-nav a.active{ box-shadow:inset 0 0 0 1px var(--border); }
+
+.hero{ box-shadow:0 16px 38px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,235,200,.18); }
+.hero-actions .btn{ padding:11px 18px; }
+
+.game-wrap{ position:relative; }
+.game-wrap::before{ content:""; position:absolute; top:0; right:24px; left:24px; height:3px; border-radius:0 0 4px 4px; background:var(--accent-grad); }
+.game-h1{ letter-spacing:.3px; text-shadow:0 2px 12px rgba(227,184,98,.25); }
+.board{ box-shadow:0 14px 34px rgba(0,0,0,.45), 0 0 0 2px #2c1a0c, 0 0 36px rgba(227,184,98,.12), inset 0 0 0 1px rgba(255,220,160,.18); }
+.clock-box{ font-size:24px; box-shadow:inset 0 1px 0 rgba(255,255,255,.06); }
+.clock-box.clock-active{ box-shadow:0 0 18px rgba(197,129,64,.45); }
+.status-bar{ box-shadow:inset 0 1px 0 rgba(255,255,255,.05); }
+.mode-bar button, .diff-bar button, .timer-toggle button{ box-shadow:inset 0 1px 0 rgba(255,255,255,.05); }
+.mode-bar button:hover:not(.active), .timer-toggle button:hover:not(.active){ border-color:var(--gold); color:var(--text); }
+.card h2{ font-size:15.5px; }
+.input:focus{ box-shadow:0 0 0 3px rgba(227,184,98,.18); }
+.chat-msg{ animation:fadeUp .2s ease both; }

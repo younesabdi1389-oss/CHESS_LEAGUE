@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>تماشای بازی | Chess League</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/game.css">
+</head>
+<body class="game-body">
+  <div class="game-wrap">
+    <div class="top-row">
+      <a href="history.html" class="back-link">→ تاریخچه‌ی بازی‌ها</a>
+      <div class="top-actions">
+        <button class="sound-btn" data-sound-toggle type="button">🔊 صدا روشن</button>
+        <button class="theme-toggle" id="themeToggleBtn" type="button">🌙</button>
+      </div>
+    </div>
+
+    <h1 class="game-h1">🎬 تماشای بازی</h1>
+
+    <div class="rp-players" id="rpPlayers">در حال بارگذاری...</div>
+    <div class="status-bar" id="statusBar" aria-live="polite">—</div>
+
+    <div class="board" id="board"></div>
+
+    <input type="range" id="rpSlider" class="rp-slider" min="0" max="0" value="0" aria-label="موقعیت بازی">
+    <div class="rp-controls">
+      <button type="button" id="rpStart" title="اول بازی">⏮</button>
+      <button type="button" id="rpPrev" title="حرکت قبلی">◀</button>
+      <button type="button" id="rpPlay" class="rp-play" title="پخش / توقف">▶</button>
+      <button type="button" id="rpNext" title="حرکت بعدی">▶</button>
+      <button type="button" id="rpEnd" title="آخر بازی">⏭</button>
+    </div>
+    <div class="rp-options">
+      <div class="timer-toggle" id="rpSpeed">
+        <button type="button" data-s="1500">آرام</button>
+        <button type="button" data-s="900" class="active">عادی</button>
+        <button type="button" data-s="400">سریع</button>
+      </div>
+      <button type="button" class="sound-btn" id="rpFlip">🔄 چرخاندن تخته</button>
+    </div>
+
+    <div class="card history-card">
+      <h2>حرکت‌ها <span class="timer-note" style="margin:0">روی هر حرکت بزن تا بپری اونجا</span></h2>
+      <div id="rpMoves" class="rp-moves">—</div>
+    </div>
+  </div>
+
+  <script src="/vendor/chess.js"></script>
+  <script>window.Chess||document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"><\/script>')</script>
+  <script src="js/theme.js"></script>
+  <script src="js/nav-common.js"></script>
+  <script src="js/board-render.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/avatars.js"></script>
+  <script src="js/replay.js"></script>
+</body>
+</html>

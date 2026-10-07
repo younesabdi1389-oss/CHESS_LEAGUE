@@ -132,6 +132,7 @@ function removeRoom(code) {
 }
 
 module.exports = {
+  Chess,
   createRoom,
   joinRoom,
   findRoomByPlayer,

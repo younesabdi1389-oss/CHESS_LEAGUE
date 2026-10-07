@@ -127,6 +127,32 @@ app.get("/api/history", requireDb, async (req, res) => {
 
 // ثبت نتیجه‌ی بازی «محلی» (دو نفر روی یک دستگاه). این مسیر به اعتماد بین
 // دوست‌ها تکیه داره؛ بازی‌های آنلاین نتیجه‌شون رو خود سرور ثبت می‌کنه.
+// حرکت‌های ارسالی کلاینت رو با chess.js دوباره بازی می‌کنیم؛ اگه حتی یکیش غیرقانونی بود ذخیره نمی‌شه
+function validMoves(moves) {
+  if (!Array.isArray(moves) || moves.length === 0 || moves.length > 600) return null;
+  const g = new rm.Chess();
+  const out = [];
+  for (const san of moves) {
+    if (typeof san !== "string" || !/^[A-Za-z0-9+#=\-]{2,10}$/.test(san)) return null;
+    const m = g.move(san);
+    if (!m) return null;
+    out.push(m.san);
+  }
+  return out;
+}
+
+app.get("/api/games/:id", requireDb, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (!Number.isInteger(id) || id < 1) return res.status(400).json({ error: "شناسه‌ی بازی نامعتبره" });
+    const game = await queries.getGame(id);
+    if (!game) return res.status(404).json({ error: "بازی پیدا نشد" });
+    res.json(game);
+  } catch (err) {
+    res.status(500).json({ error: "خطای دیتابیس" });
+  }
+});
+
 app.post("/api/games", requireDb, rateLimitWrites(10), async (req, res) => {
   try {
     const whiteName = rm.cleanText(req.body.whiteName, 20);
@@ -138,7 +164,7 @@ app.post("/api/games", requireDb, rateLimitWrites(10), async (req, res) => {
     if (whiteName.toLowerCase() === blackName.toLowerCase()) {
       return res.status(400).json({ error: "اسم دو بازیکن نباید یکی باشه." });
     }
-    res.json(await queries.recordGame(whiteName, blackName, result));
+    res.json(await queries.recordGame(whiteName, blackName, result, validMoves(req.body.moves), "local"));
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -162,6 +188,8 @@ app.get("/api/dashboard", requireDb, async (req, res) => {
       },
       leagueTable: leaderboard.map((p) => ({ ...p, isMe: p.name === name })),
       recentGames: recent.map((g) => ({
+        id: g.id,
+        hasMoves: !!g.has_moves,
         players: `${g.white_name} vs ${g.black_name}`,
         result: g.result === "draw" ? "مساوی" : g.result === "white" ? `برد ${g.white_name}` : `برد ${g.black_name}`,
         type: g.result === "draw" ? "draw" : "win",
@@ -184,6 +212,7 @@ function roomState(room, color) {
     fen: room.game.fen(),
     history: room.game.history(),
     status: room.status,
+    gameId: room.gameId || null,
     withTimer: room.withTimer,
     minutes: room.minutes,
     inc: room.inc,
@@ -237,7 +266,9 @@ async function finishRoomGame(room, result, reason) {
 
   if (isConnected() && room.black) {
     try {
-      await queries.recordGame(room.white.name, room.black.name, result);
+      const saved = await queries.recordGame(room.white.name, room.black.name, result, room.game.history(), room.reason);
+      room.gameId = saved.id;
+      io.to(room.code).emit("game_saved", { gameId: saved.id }); // کلاینت دکمه‌ی «تماشای بازی» رو نشون می‌ده
     } catch (err) {
       console.error("⚠️ ثبت نتیجه‌ی بازی آنلاین تو دیتابیس با خطا مواجه شد:", err.message);
     }

@@ -184,3 +184,40 @@ html[data-theme="light"] .game-wrap{ box-shadow:0 14px 34px rgba(80,50,20,.14); 
 .mat-adv{ font-size:11.5px; font-weight:800; color:var(--gold); background:#e3b86222; padding:2px 9px; border-radius:999px; }
 .mat-adv:empty{ display:none; }
 .controls button.secondary{ background:var(--card2); color:var(--text); border:1px solid var(--border); }
+
+/* ---------- مختصات تخته (a-h و 1-8) ---------- */
+.sq[data-file]::after, .sq[data-rank]::before{
+  position:absolute; font-size:9.5px; font-weight:800; line-height:1; pointer-events:none; opacity:.75; z-index:1;
+}
+.sq[data-file]::after{ content:attr(data-file); right:3px; bottom:2px; }
+.sq[data-rank]::before{ content:attr(data-rank); left:3px; top:2px; }
+.sq.light[data-file]::after, .sq.light[data-rank]::before{ color:#8a5a2b; }
+.sq.dark[data-file]::after, .sq.dark[data-rank]::before{ color:#f0dcb4; }
+
+/* ---------- تماشای بازی ---------- */
+.rp-players{ display:flex; justify-content:center; align-items:center; gap:12px; font-weight:800; font-size:14px; margin-bottom:10px; flex-wrap:wrap; }
+.rp-players b{ color:var(--text2); font-size:12px; }
+.rp-slider{ width:100%; margin:16px 0 6px; accent-color:var(--gold); direction:ltr; height:28px; }
+.rp-controls{ display:flex; justify-content:center; gap:8px; direction:ltr; margin-bottom:12px; }
+.rp-controls button{
+  width:52px; height:48px; border-radius:13px; border:1px solid var(--border); background:var(--card2); color:var(--text);
+  font-size:18px; cursor:pointer; transition:transform .1s, border-color .15s;
+}
+.rp-controls button:hover{ border-color:var(--gold); }
+.rp-controls button:active{ transform:scale(.94); }
+.rp-controls .rp-play{ width:76px; background:var(--accent-grad); color:#fff8ea; border-color:transparent; font-size:20px; }
+.rp-options{ display:flex; gap:8px; align-items:stretch; flex-wrap:wrap; }
+.rp-options .timer-toggle{ flex:1; margin:0; min-width:200px; }
+.rp-moves{ max-height:190px; overflow-y:auto; overscroll-behavior:contain; display:flex; flex-wrap:wrap; gap:4px 10px; font-size:13px; }
+.rp-moves .mrow{ display:flex; gap:4px; align-items:center; direction:ltr; }
+.rp-moves .mn{ color:var(--text2); font-size:11px; min-width:20px; }
+.rp-moves .mv{ padding:3px 8px; border-radius:7px; cursor:pointer; background:var(--card2); border:1px solid transparent; font-weight:700; }
+.rp-moves .mv:hover{ border-color:var(--border); }
+.rp-moves .mv.on{ background:var(--accent-grad); color:#fff8ea; }
+
+.watch-btn, .replay-link{
+  display:inline-block; background:var(--accent-grad); color:#fff8ea !important; border-radius:9px;
+  padding:5px 12px; font-size:12px; font-weight:800; box-shadow:inset 0 1px 0 rgba(255,255,255,.22);
+}
+.watch-btn:hover, .replay-link:hover{ filter:brightness(1.1); }
+.replay-link{ padding:11px 22px; font-size:13px; border-radius:12px; }

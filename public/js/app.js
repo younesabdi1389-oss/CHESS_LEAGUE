@@ -87,7 +87,7 @@ function renderDashboard(data) {
           (g) => `
     <div class="game-row">
       <span>${escapeHTML(g.players)}</span>
-      <span class="result ${g.type}">${escapeHTML(g.result)}</span>
+      <span class="result ${g.type}">${escapeHTML(g.result)}</span>${g.hasMoves ? `<a class="watch-btn" href="replay.html?id=${g.id}">▶</a>` : ""}
     </div>`
         )
         .join("")

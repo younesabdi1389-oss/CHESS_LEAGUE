@@ -36,6 +36,8 @@ function createBoardRenderer(boardEl, options) {
       const div = document.createElement("div");
       div.className = "sq " + ((r + c) % 2 === 0 ? "light" : "dark");
       div.dataset.sq = sq;
+      if (rr === 7) div.dataset.file = FILES[c]; // حرف ستون پایین تخته
+      if (cc === 0) div.dataset.rank = String(8 - r); // شماره‌ی ردیف کنار تخته
       frag.appendChild(div);
       squareEls[sq] = div;
       squareClass[sq] = div.className;

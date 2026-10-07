@@ -37,6 +37,9 @@ async function ensureSchema() {
       played_at TIMESTAMP DEFAULT NOW()
     );
   `);
+  // برای «تماشای بازی»: حرکت‌های بازی (آرایه‌ی SAN به‌صورت JSON) و دلیل پایان — ستون‌های جدید فقط اگه نبودن اضافه می‌شن
+  await pool.query(`ALTER TABLE games ADD COLUMN IF NOT EXISTS moves TEXT;`);
+  await pool.query(`ALTER TABLE games ADD COLUMN IF NOT EXISTS reason TEXT;`);
   console.log("✅ جدول‌های دیتابیس چک/ساخته شدن");
 }
 

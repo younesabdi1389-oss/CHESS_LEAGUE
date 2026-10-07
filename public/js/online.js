@@ -130,6 +130,7 @@ function resetToLobby() {
   moveInFlight = false;
   chatIds = new Set();
   $("chatLog").textContent = "";
+  $("replayLink").style.display = "none";
   $("previewBox").style.display = "none";
   previewCode = null;
   if (clockDisplay) clockDisplay.stopTimer();
@@ -337,6 +338,7 @@ function applyRoomState(d) {
   setClocks(d.timeLeft, d.status === "playing" ? game.turn() : null);
   render();
 
+  if (d.gameId) showReplayLink(d.gameId);
   if (d.status === "over") {
     handleGameOver({ result: d.result, reason: d.reason, timeLeft: d.timeLeft }, true);
   } else {
@@ -383,6 +385,12 @@ function handleGameOver(data, silent) {
     confettiFired = true;
     burstConfetti();
   }
+}
+
+function showReplayLink(id) {
+  const a = $("replayLink");
+  a.href = "replay.html?id=" + id;
+  a.style.display = "inline-block";
 }
 
 // ---------- ارسال حرکت ----------
@@ -603,6 +611,7 @@ function connect() {
   });
 
   socket.on("game_over", (d) => handleGameOver(d, false));
+  socket.on("game_saved", (d) => showReplayLink(d.gameId)); // بعد از ذخیره‌ی بازی تو دیتابیس
 
   socket.on("chat_message", (m) => addChatLine(m, false));
   socket.on("reaction", (d) => showFloatingEmoji(d.emoji));

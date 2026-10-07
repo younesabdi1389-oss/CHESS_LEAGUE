@@ -23,6 +23,7 @@
 
   <script src="js/theme.js"></script>
   <script src="js/nav-common.js"></script>
+  <script src="js/avatars.js"></script>
   <script>
     async function load() {
       const box = document.getElementById("historyGames");
@@ -34,10 +35,11 @@
           ? games.map(g => {
               const resultText = g.result === "draw" ? "مساوی" : g.result === "white" ? `برد ${g.white_name}` : `برد ${g.black_name}`;
               const type = g.result === "draw" ? "draw" : "win";
+              const watch = g.has_moves ? `<a class="watch-btn" href="replay.html?id=${g.id}">▶ تماشا</a>` : "";
               return `
               <div class="game-row">
-                <span>${g.white_name} vs ${g.black_name}</span>
-                <span class="result ${type}">${resultText}</span>
+                <span>${escapeHTML(g.white_name)} <small style="color:var(--text2)">vs</small> ${escapeHTML(g.black_name)}</span>
+                <span style="display:flex; gap:8px; align-items:center"><span class="result ${type}">${escapeHTML(resultText)}</span>${watch}</span>
               </div>`;
             }).join("")
           : `<div style="color:var(--text2); font-size:13px">هنوز بازی‌ای ثبت نشده</div>`;

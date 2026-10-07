@@ -294,11 +294,18 @@ document.getElementById("submitResultBtn").addEventListener("click", async () =>
     const res = await fetch("/api/games", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ whiteName, blackName, result }),
+      body: JSON.stringify({ whiteName, blackName, result, moves: game.history() }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "خطای نامشخص");
-    msg.textContent = "✅ نتیجه ثبت شد و تو جدول امتیازات لیگ اعمال شد.";
+    msg.textContent = "✅ نتیجه ثبت شد و تو جدول امتیازات لیگ اعمال شد. ";
+    if (data.id) {
+      const a = document.createElement("a");
+      a.href = "replay.html?id=" + data.id;
+      a.className = "watch-btn";
+      a.textContent = "🎬 تماشای این بازی";
+      msg.appendChild(a);
+    }
   } catch (err) {
     msg.textContent = "❌ ثبت نشد: " + err.message;
     btn.disabled = false; // اجازه‌ی تلاش دوباره
