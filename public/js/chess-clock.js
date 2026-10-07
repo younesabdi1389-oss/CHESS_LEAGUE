@@ -89,9 +89,12 @@ function createClockDisplay(clockEls) {
 }
 
 // ساعت بازی محلی (دو نفره / بات): خودش رنگ فعال رو نگه می‌داره.
-function createLocalClock(clockEls, onFlag) {
+function createLocalClock(clockEls, onFlag, cfg) {
   const display = createClockDisplay(clockEls);
-  let time = { w: CLOCK_START_SECONDS * 1000, b: CLOCK_START_SECONDS * 1000 };
+  cfg = cfg || {};
+  let inc = (cfg.inc || 0) * 1000; // ثانیه‌ی اضافه بعد از هر حرکت
+  let startMs = (cfg.minutes || 10) * 60 * 1000;
+  let time = { w: startMs, b: startMs };
   let running = null;
   let startedAt = 0;
   let flagged = false;
@@ -116,7 +119,9 @@ function createLocalClock(clockEls, onFlag) {
 
   function start(color) {
     if (flagged) return;
+    const prev = running;
     commit();
+    if (prev && prev !== color) time[prev] += inc; // جایزه‌ی زمانی بعد از حرکت
     running = color;
     startedAt = performance.now();
     display.set(time, running, checkFlag);
@@ -128,10 +133,12 @@ function createLocalClock(clockEls, onFlag) {
     display.set(time, null);
   }
 
-  function reset() {
+  function reset(minutes, increment) {
+    if (minutes) startMs = minutes * 60 * 1000;
+    if (increment !== undefined) inc = increment * 1000;
     running = null;
     flagged = false;
-    time = { w: CLOCK_START_SECONDS * 1000, b: CLOCK_START_SECONDS * 1000 };
+    time = { w: startMs, b: startMs };
     display.set(time, null);
   }
 

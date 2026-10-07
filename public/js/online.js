@@ -48,7 +48,9 @@ let confettiFired = false;
 let overHandled = false;
 let moveInFlight = false;
 let moveInFlightTimer = null;
-let wantTimer = CLPrefs.get("cl-timer-pref", "0") === "1";
+let timerCfg = { enabled: false, minutes: 10, inc: 0 };
+let roomMinutes = 10;
+let roomInc = 0;
 let renderer = null;
 let rendererColor = null;
 let resignArmed = null;
@@ -98,7 +100,7 @@ function hideBanner() {
 }
 
 function timerBadgeText() {
-  return roomWithTimer ? "⏱️ بازی با تایمر (۱۰ دقیقه برای هر نفر)" : "⏱️ بازی بدون تایمر";
+  return roomWithTimer ? "⏱️ بازی با تایمر: " + describeTimer(roomMinutes, roomInc) + " (برای هر نفر)" : "⏱️ بازی بدون تایمر";
 }
 
 function enableLobby(on) {
@@ -140,21 +142,8 @@ function resetToLobby() {
 
 // ---------- لابی ----------
 nameInput.value = CLPrefs.get(PLAYER_KEY, "");
-$("timerOnBtn").classList.toggle("active", wantTimer);
-$("timerOffBtn").classList.toggle("active", !wantTimer);
-
-$("timerOffBtn").addEventListener("click", function () {
-  wantTimer = false;
-  CLPrefs.set("cl-timer-pref", "0");
-  this.classList.add("active");
-  $("timerOnBtn").classList.remove("active");
-});
-$("timerOnBtn").addEventListener("click", function () {
-  wantTimer = true;
-  CLPrefs.set("cl-timer-pref", "1");
-  this.classList.add("active");
-  $("timerOffBtn").classList.remove("active");
-});
+const timePicker = createTimePicker($("timerPicker"), (cfg) => (timerCfg = cfg));
+timerCfg = timePicker.get();
 
 function getName() {
   const name = nameInput.value.trim().slice(0, 20);
@@ -172,7 +161,7 @@ $("createRoomBtn").addEventListener("click", () => {
   if (!name || !socket || !socket.connected) return;
   lobbyMsg.textContent = "";
   setLoading($("createRoomBtn"), true);
-  socket.emit("create_room", { playerId, name, withTimer: wantTimer });
+  socket.emit("create_room", { playerId, name, withTimer: timerCfg.enabled, minutes: timerCfg.minutes, inc: timerCfg.inc });
 });
 
 $("joinRoomBtn").addEventListener("click", () => {
@@ -316,6 +305,8 @@ function applyRoomState(d) {
   myColor = d.color;
   roomStatus = d.status;
   roomWithTimer = !!d.withTimer;
+  roomMinutes = d.minutes || 10;
+  roomInc = d.inc || 0;
   game = new Chess(d.fen);
   historyList = d.history || [];
   lastMove = d.lastMove ? { from: d.lastMove.from, to: d.lastMove.to } : null;
@@ -554,7 +545,7 @@ function connect() {
     previewCode = d.code;
     roomWithTimer = !!d.withTimer;
     $("previewText").textContent = `اتاق ${d.code} (سازنده: ${d.hostName}) — ${
-      d.withTimer ? "با تایمر ۱۰ دقیقه‌ای برای هر نفر" : "بدون تایمر"
+      d.withTimer ? "با تایمر: " + describeTimer(d.minutes || 10, d.inc || 0) + " برای هر نفر" : "بدون تایمر"
     }`;
     $("previewBox").style.display = "block";
   });

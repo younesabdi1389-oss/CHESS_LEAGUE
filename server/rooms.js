@@ -39,8 +39,16 @@ function isValidPlayerId(id) {
   return typeof id === "string" && /^[A-Za-z0-9_-]{8,64}$/.test(id);
 }
 
-function createRoom(playerId, socketId, name, withTimer) {
+function clampInt(v, lo, hi, d) {
+  v = Math.round(Number(v));
+  return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d;
+}
+
+function createRoom(playerId, socketId, name, withTimer, minutes, inc) {
   const code = generateRoomCode();
+  minutes = clampInt(minutes, 1, 180, 10); // زمان هر نفر: ۱ تا ۱۸۰ دقیقه
+  inc = clampInt(inc, 0, 60, 0); // ثانیه‌ی اضافه بعد از هر حرکت
+  const startMs = minutes * 60 * 1000;
   const room = {
     code,
     game: new Chess(),
@@ -48,7 +56,9 @@ function createRoom(playerId, socketId, name, withTimer) {
     black: null,
     status: "waiting", // waiting | playing | over
     withTimer: !!withTimer,
-    timeLeft: { w: CLOCK_START_MS, b: CLOCK_START_MS },
+    minutes,
+    inc,
+    timeLeft: { w: startMs, b: startMs },
     turnStartedAt: null,
     timeoutHandle: null,
     result: null,

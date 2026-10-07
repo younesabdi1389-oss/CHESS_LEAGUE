@@ -14,14 +14,16 @@ let mode = "local"; // "local" یا "bot"
 let difficulty = "easy";
 let botColor = "b";
 
-let withTimer = CLPrefs.get("cl-timer-pref", "0") === "1";
+let timerCfg = { enabled: false, minutes: 10, inc: 0 }; // از انتخاب‌گر تایمر پر می‌شه
+let withTimer = false;
+let flipped = false;
 let clock = null;
 let botTimeout = null; // تایمر فکر کردن بات (برای پاک‌سازی موقع شروع دوباره)
 let endSoundPlayed = false;
 let gameEndedByTimeout = null; // رنگی که وقتش تموم شد (بازنده)
 
 const boardEl = document.getElementById("board");
-const renderer = createBoardRenderer(boardEl, {
+let renderer = createBoardRenderer(boardEl, {
   flip: false,
   onSquareClick: (sq) => onSquareClick(sq),
 });
@@ -34,7 +36,30 @@ function render() {
   });
   updateStatusBar();
   updateHistory();
+  updateCaptured();
   updateResultPanel();
+}
+
+// مهره‌های گرفته‌شده و برتری مادی
+const PIECE_VALUE = { p: 1, n: 3, b: 3, r: 5, q: 9 };
+function updateCaptured() {
+  const start = { p: 8, n: 2, b: 2, r: 2, q: 1 };
+  const have = { w: { p: 0, n: 0, b: 0, r: 0, q: 0 }, b: { p: 0, n: 0, b: 0, r: 0, q: 0 } };
+  game.board().forEach((row) => row.forEach((p) => p && p.type !== "k" && have[p.color][p.type]++));
+  let score = 0;
+  const lost = { w: "", b: "" };
+  ["w", "b"].forEach((c) => {
+    Object.keys(start).forEach((t) => {
+      const missing = Math.max(0, start[t] - have[c][t]);
+      lost[c] += PIECE_GLYPH[t].repeat(missing);
+      score += (c === "w" ? -1 : 1) * missing * PIECE_VALUE[t]; // مهره‌ی از‌دست‌رفته‌ی سفید = به نفع سیاه
+    });
+  });
+  // سفید چه چیزی از سیاه گرفته؟ همون چیزی که سیاه ازدست داده
+  document.getElementById("capByWhite").textContent = lost.b || "—";
+  document.getElementById("capByBlack").textContent = lost.w || "—";
+  const adv = document.getElementById("materialAdv");
+  adv.textContent = score === 0 ? "" : score > 0 ? `سفید +${score}` : `سیاه +${-score}`;
 }
 
 function findCheckSquare() {
@@ -298,17 +323,18 @@ function resetGame() {
   sb.classList.remove("loading");
   document.getElementById("submitResultMsg").textContent = "";
 
+  withTimer = timerCfg.enabled;
   const clockRow = document.getElementById("clockRow");
   if (withTimer) {
     clockRow.style.display = "flex";
     if (!clock) {
       clock = createLocalClock(
         { w: document.getElementById("clockWhite"), b: document.getElementById("clockBlack") },
-        onClockFlag
+        onClockFlag,
+        { minutes: timerCfg.minutes, inc: timerCfg.inc }
       );
-    } else {
-      clock.reset();
     }
+    clock.reset(timerCfg.minutes, timerCfg.inc);
     clock.start("w");
   } else {
     clockRow.style.display = "none";
@@ -321,19 +347,52 @@ function resetGame() {
 
 document.getElementById("resetBtn").addEventListener("click", resetGame);
 
-document.getElementById("timerOffBtn").addEventListener("click", function () {
-  withTimer = false;
-  CLPrefs.set("cl-timer-pref", "0");
-  this.classList.add("active");
-  document.getElementById("timerOnBtn").classList.remove("active");
-  resetGame();
+// انتخاب‌گر تایمر: وسط بازی فقط ذخیره می‌شه (با «شروع دوباره» اعمال می‌شه)؛ قبل از اولین حرکت فوری اعمال می‌شه
+const timePicker = createTimePicker(document.getElementById("timerPicker"), (cfg) => {
+  timerCfg = cfg;
+  if (game.history().length === 0) resetGame();
+  else toast("تنظیم تایمر با «شروع دوباره» اعمال می‌شه.");
 });
-document.getElementById("timerOnBtn").addEventListener("click", function () {
-  withTimer = true;
-  CLPrefs.set("cl-timer-pref", "1");
-  this.classList.add("active");
-  document.getElementById("timerOffBtn").classList.remove("active");
-  resetGame();
+timerCfg = timePicker.get();
+withTimer = timerCfg.enabled;
+
+let toastTimer = null;
+function toast(text) {
+  let el = document.getElementById("toast");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "toast";
+    el.className = "toast";
+    document.body.appendChild(el);
+  }
+  el.textContent = text;
+  el.style.display = "block";
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => (el.style.display = "none"), 2400);
+}
+
+// چرخاندن تخته
+document.getElementById("flipBtn").addEventListener("click", () => {
+  flipped = !flipped;
+  renderer = createBoardRenderer(boardEl, { flip: flipped, onSquareClick: (sq) => onSquareClick(sq) });
+  render();
+});
+
+// برگشت حرکت (محلی: یک حرکت؛ با بات: حرکت بات + حرکت خودت)
+document.getElementById("undoBtn").addEventListener("click", () => {
+  if (gameEndedByTimeout || game.history().length === 0) return;
+  clearTimeout(botTimeout);
+  botTimeout = null;
+  game.undo();
+  if (mode === "bot" && game.turn() === botColor && game.history().length > 0) game.undo();
+  selectedSquare = null;
+  const h = game.history({ verbose: true });
+  lastMove = h.length ? { from: h[h.length - 1].from, to: h[h.length - 1].to } : null;
+  endSoundPlayed = false;
+  confettiFired = false;
+  if (clock && withTimer) clock.switchTurn(game.turn());
+  render();
+  maybeTriggerBotMove();
 });
 
 const modeLocalBtn = document.getElementById("modeLocalBtn");
@@ -364,7 +423,4 @@ diffBar.querySelectorAll("button[data-diff]").forEach((btn) => {
   });
 });
 
-// حالت اولیه‌ی دکمه‌های تایمر از تنظیم ذخیره‌شده
-document.getElementById("timerOnBtn").classList.toggle("active", withTimer);
-document.getElementById("timerOffBtn").classList.toggle("active", !withTimer);
 resetGame();

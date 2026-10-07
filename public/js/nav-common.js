@@ -43,6 +43,7 @@
     { href: "online.html", icon: "globe", label: "آنلاین" },
     { href: "learn.html", icon: "book", label: "آموزش" },
     { href: "league.html", icon: "trophy", label: "لیگ" },
+    { href: "profile.html", icon: "user", label: "من" },
   ];
 
   const current = location.pathname.split("/").pop() || "index.html";
@@ -57,7 +58,7 @@
     overlay.id = "overlay";
 
     const drawer = document.createElement("aside");
-    drawer.className = "sidebar" + (isGamePage ? "" : " dockable");
+    drawer.className = "sidebar";
     drawer.id = "sidebar";
     drawer.setAttribute("aria-label", "منوی اصلی");
     drawer.innerHTML = `
@@ -70,16 +71,23 @@
 
     document.body.prepend(drawer);
     document.body.appendChild(overlay);
-    if (!isGamePage) document.body.classList.add("has-dock");
 
-    // دکمه‌ی منو برای صفحه‌های بازی در دسکتاپ
-    if (isGamePage) {
-      const b = document.createElement("button");
-      b.className = "menu-btn";
-      b.type = "button";
-      b.innerHTML = ICONS.menu + "<span>منو</span>";
-      b.addEventListener("click", open);
-      document.body.appendChild(b);
+    // دکمه‌ی سه‌خطی (همبرگری) تو هدر هر صفحه، سمت راست
+    const header = document.querySelector(".topbar") || document.querySelector(".top-row");
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "hamburger";
+    btn.setAttribute("aria-label", "باز کردن منو");
+    btn.innerHTML = "<span></span><span></span><span></span>";
+    btn.addEventListener("click", open);
+    if (header && header.firstElementChild) {
+      const wrap = document.createElement("div");
+      wrap.className = "hdr-start";
+      header.insertBefore(wrap, header.firstElementChild);
+      wrap.append(btn, wrap.nextElementSibling);
+    } else {
+      btn.classList.add("floating");
+      document.body.appendChild(btn);
     }
 
     // نوار پایین موبایل
@@ -89,11 +97,9 @@
       BOTTOM_ITEMS.map(
         (it) =>
           `<a href="${it.href}" class="${current === it.href ? "active" : ""}"><span class="bn-icon">${ICONS[it.icon]}</span><span class="bn-label">${it.label}</span></a>`
-      ).join("") +
-      `<button type="button" class="bn-menu" id="bnMenuBtn"><span class="bn-icon">${ICONS.menu}</span><span class="bn-label">منو</span></button>`;
+      ).join("");
     document.body.appendChild(nav);
 
-    document.getElementById("bnMenuBtn").addEventListener("click", open);
     overlay.addEventListener("click", close);
     drawer.addEventListener("click", (e) => {
       if (e.target.closest("a")) close();

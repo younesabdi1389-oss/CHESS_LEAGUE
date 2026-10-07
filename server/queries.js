@@ -52,39 +52,58 @@ async function getRecentGames(limit = 20) {
 }
 
 // جدول امتیازات رو از روی تمام بازی‌های ثبت‌شده محاسبه می‌کنه (نه از یه فیلد جداگانه)
+// سیستم امتیاز: برد +۱ ، مساوی ۰ ، باخت −۱ (پس امتیاز می‌تونه منفی هم بشه).
+// چون از روی بازی‌ها حساب می‌شه، بازی‌های قدیمی هم خودکار با این قانون دوباره امتیاز می‌گیرن.
+const SCORE = { win: 1, draw: 0, loss: -1 };
+
 async function getLeaderboard() {
   const players = await listPlayers();
-  const games = (await pool.query("SELECT * FROM games")).rows;
+  const games = (await pool.query("SELECT * FROM games ORDER BY played_at ASC, id ASC")).rows;
 
+  const blank = (name, avatar) => ({ name, avatar: avatar || 0, played: 0, won: 0, draw: 0, lost: 0, points: 0, form: [] });
   const stats = {};
   players.forEach((p) => {
-    stats[p.name] = { name: p.name, avatar: p.avatar || 0, played: 0, won: 0, draw: 0, lost: 0, points: 0 };
+    stats[p.name] = blank(p.name, p.avatar);
   });
+
+  const add = (row, outcome) => {
+    row.played++;
+    if (outcome === "W") {
+      row.won++;
+      row.points += SCORE.win;
+    } else if (outcome === "L") {
+      row.lost++;
+      row.points += SCORE.loss;
+    } else {
+      row.draw++;
+      row.points += SCORE.draw;
+    }
+    row.form.push(outcome);
+    if (row.form.length > 5) row.form.shift(); // فقط ۵ نتیجه‌ی آخر
+  };
 
   games.forEach((g) => {
     [g.white_name, g.black_name].forEach((n) => {
-      if (!stats[n]) stats[n] = { name: n, played: 0, won: 0, draw: 0, lost: 0, points: 0 };
+      if (!stats[n]) stats[n] = blank(n);
     });
-    stats[g.white_name].played++;
-    stats[g.black_name].played++;
-
+    const w = stats[g.white_name];
+    const b = stats[g.black_name];
     if (g.result === "draw") {
-      stats[g.white_name].draw++;
-      stats[g.black_name].draw++;
-      stats[g.white_name].points += 1;
-      stats[g.black_name].points += 1;
+      add(w, "D");
+      add(b, "D");
     } else if (g.result === "white") {
-      stats[g.white_name].won++;
-      stats[g.black_name].lost++;
-      stats[g.white_name].points += 3;
+      add(w, "W");
+      add(b, "L");
     } else {
-      stats[g.black_name].won++;
-      stats[g.white_name].lost++;
-      stats[g.black_name].points += 3;
+      add(b, "W");
+      add(w, "L");
     }
   });
 
-  const table = Object.values(stats).sort((a, b) => b.points - a.points);
+  const table = Object.values(stats);
+  table.forEach((r) => (r.winRate = r.played ? Math.round((r.won / r.played) * 100) : 0));
+  // رتبه‌بندی: امتیاز بیشتر، بعد برد بیشتر، بعد باخت کمتر، بعد اسم
+  table.sort((a, b) => b.points - a.points || b.won - a.won || a.lost - b.lost || a.name.localeCompare(b.name));
   table.forEach((row, i) => (row.rank = i + 1));
   return table;
 }

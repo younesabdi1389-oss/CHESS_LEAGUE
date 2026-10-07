@@ -30,10 +30,7 @@
       <button data-diff="hard" type="button">هارد</button>
     </div>
 
-    <div class="timer-toggle">
-      <button id="timerOffBtn" class="active" type="button">⏱️ بدون تایمر</button>
-      <button id="timerOnBtn" type="button">⏱️ با تایمر (۱۰ دقیقه)</button>
-    </div>
+    <div id="timerPicker"></div>
     <div class="clock-row" id="clockRow" style="display:none">
       <div class="clock-box" id="clockBlack">10:00<div class="clock-label">سیاه</div></div>
       <div class="clock-box" id="clockWhite">10:00<div class="clock-label">سفید</div></div>
@@ -41,10 +38,14 @@
 
     <div class="status-bar" id="statusBar" aria-live="polite">نوبت: سفید</div>
 
+    <div class="captured-row"><span class="cap-label">⚫</span><span class="cap-pieces" id="capByWhite">—</span><span class="mat-adv" id="materialAdv"></span></div>
     <div class="board" id="board"></div>
+    <div class="captured-row"><span class="cap-label">⚪</span><span class="cap-pieces" id="capByBlack">—</span></div>
 
     <div class="controls">
       <button id="resetBtn" type="button">شروع دوباره</button>
+      <button id="undoBtn" type="button" class="secondary">↩ برگشت حرکت</button>
+      <button id="flipBtn" type="button" class="secondary">🔄 چرخاندن تخته</button>
     </div>
 
     <div class="card history-card">
@@ -84,6 +85,7 @@
   <script src="js/nav-common.js"></script>
   <script src="js/board-render.js"></script>
   <script src="js/chess-clock.js"></script>
+  <script src="js/time-picker.js"></script>
   <script src="js/sounds.js"></script>
   <script src="js/bot.js"></script>
   <script src="js/game.js"></script>

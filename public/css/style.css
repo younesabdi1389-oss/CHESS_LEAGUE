@@ -59,21 +59,16 @@ button{font-family:inherit; touch-action:manipulation;}
 .nav a:hover{ background:var(--card2); color:var(--text); }
 .nav a.active{background:var(--card2); color:var(--gold); font-weight:800; box-shadow:inset -3px 0 0 var(--gold);}
 
-.menu-btn{
-  position:fixed; top:14px; right:14px; z-index:120; display:none; align-items:center; gap:7px;
-  background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:11px;
-  padding:8px 14px; font-size:13px; font-weight:700; cursor:pointer; box-shadow:var(--shadow);
+/* دکمه‌ی سه‌خطی تو هدر (سمت راست) */
+.hdr-start{display:flex; align-items:center; gap:10px; min-width:0;}
+.hamburger{
+  width:42px; height:42px; flex-shrink:0; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:5px;
+  background:var(--card); border:1px solid var(--border); border-radius:11px; cursor:pointer;
 }
-.menu-btn:hover{ border-color:var(--gold); }
-@media(min-width:768px){ .menu-btn{display:flex;} }
+.hamburger span{display:block; width:18px; height:2px; border-radius:2px; background:var(--text);}
+.hamburger:hover{border-color:var(--gold);}
+.hamburger.floating{position:fixed; top:12px; right:12px; z-index:120;}
 
-/* دسکتاپ: صفحه‌های داشبورد منو رو ثابت کنار صفحه نشون می‌دن */
-@media(min-width:768px){
-  body.has-dock .sidebar.dockable{
-    position:sticky; transform:none; box-shadow:none; flex-shrink:0; width:240px; z-index:20; transition:none;
-  }
-  body.has-dock .overlay{display:none;}
-}
 
 /* ---------- محتوای اصلی ---------- */
 .main{flex:1; padding:22px 26px; min-width:0;}
@@ -85,12 +80,17 @@ button{font-family:inherit; touch-action:manipulation;}
   display:flex; align-items:center; gap:8px; background:var(--card);
   border:1px solid var(--border); border-radius:999px; padding:6px 14px 6px 6px; font-size:13px;
 }
+/* ---------- آواتارها ---------- */
 .avatar{
-  width:30px; height:30px; border-radius:50%; background:var(--accent-grad);
-  display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; color:#fff;
+  width:32px; height:32px; border-radius:50%; flex-shrink:0; line-height:1; color:#fff8ea;
+  background:linear-gradient(145deg,var(--c1,#c58140),var(--c2,#8c5628));
+  box-shadow:0 0 0 2px rgba(255,235,200,.28), 0 3px 8px rgba(0,0,0,.35);
+  display:flex; align-items:center; justify-content:center; font-size:17px;
+  text-shadow:0 1px 2px rgba(0,0,0,.4); font-family:"Segoe UI Symbol","Noto Sans Symbols 2","DejaVu Sans",sans-serif;
 }
+.avatar.av-emoji{ font-size:16px; text-shadow:none; font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif; }
 .dot{width:8px; height:8px; border-radius:50%; background:var(--green); display:inline-block; margin-left:4px;}
-.avatar-sm{width:24px; height:24px; font-size:13px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff;}
+.avatar-sm{ width:26px !important; height:26px !important; font-size:14px !important; }
 
 .theme-toggle{
   background:var(--card); border:1px solid var(--border); color:var(--text);
@@ -171,7 +171,8 @@ tr.me td{color:var(--gold); font-weight:800;}
 .input:focus{ outline:none; border-color:var(--gold); }
 
 .profile-card{display:flex; align-items:center; gap:16px; margin-bottom:10px;}
-.profile-avatar{ width:64px; height:64px; border-radius:50%; font-size:24px; background:var(--accent-grad); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; flex-shrink:0; }
+.profile-avatar{ width:84px !important; height:84px !important; font-size:42px !important; box-shadow:0 0 0 4px rgba(255,235,200,.3), 0 10px 24px rgba(0,0,0,.45) !important; }
+.profile-avatar.av-emoji{ font-size:40px !important; }
 .setting-row{display:flex; align-items:center; justify-content:space-between; padding:13px 0; border-bottom:1px solid var(--border); gap:10px;}
 .setting-row:last-child{border-bottom:none;}
 .setting-row .title{font-size:13.5px; font-weight:700;}
@@ -206,3 +207,81 @@ tr.me td{color:var(--gold); font-weight:800;}
 @media(prefers-reduced-motion:reduce){
   *{ animation-duration:.01ms !important; transition-duration:.01ms !important; }
 }
+
+/* =================================================================
+   ظاهر جدید: بافت چوب، کارت‌های لایه‌دار، هیرو، سکو، امتیازها
+   ================================================================= */
+body{
+  background-image:
+    repeating-linear-gradient(92deg, rgba(255,220,170,.018) 0 2px, transparent 2px 9px),
+    radial-gradient(ellipse at 20% -10%, rgba(197,129,64,.16), transparent 55%),
+    radial-gradient(ellipse at 100% 110%, rgba(140,86,40,.16), transparent 50%);
+  background-attachment:fixed;
+}
+.card{ background-image:linear-gradient(180deg, rgba(255,235,200,.035), transparent 40%); transition:border-color .2s, transform .2s; }
+.card:hover{ border-color:#6b4a30; }
+html[data-theme="light"] .card:hover{ border-color:#c9ae80; }
+.card h2{ position:relative; padding-right:12px; }
+.card h2::before{ content:""; position:absolute; right:0; top:50%; width:4px; height:16px; margin-top:-8px; border-radius:3px; background:var(--accent-grad); }
+::-webkit-scrollbar{ width:8px; height:8px; }
+::-webkit-scrollbar-thumb{ background:var(--border); border-radius:8px; }
+
+.pts{ font-weight:800; font-variant-numeric:tabular-nums; }
+.pts-pos{ color:var(--green); } .pts-neg{ color:var(--danger); } .pts-zero{ color:var(--text2); }
+.form{ display:inline-flex; gap:3px; vertical-align:middle; direction:ltr; }
+.form i{ width:9px; height:9px; border-radius:50%; display:block; background:var(--border); }
+.form .f-W{ background:var(--green); } .form .f-L{ background:var(--danger); } .form .f-D{ background:#bda688; }
+
+/* هیرو داشبورد */
+.hero{
+  display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  background:linear-gradient(135deg,#3a2514,#5a3820 55%,#7a4a24); color:#fff1d8;
+  border:1px solid #7a4f2c; border-radius:20px; padding:22px 24px; margin-bottom:20px; position:relative; overflow:hidden;
+  box-shadow:0 14px 34px rgba(0,0,0,.35);
+}
+.hero::after{ content:"♞"; position:absolute; left:14px; bottom:-34px; font-size:150px; color:rgba(255,226,170,.09); pointer-events:none; line-height:1; }
+.hero h2{ font-size:19px; font-weight:800; margin-bottom:6px; }
+.hero h2::before{ display:none; }
+.hero p{ font-size:12.5px; opacity:.85; line-height:1.9; max-width:420px; }
+.hero-actions{ display:flex; gap:8px; flex-wrap:wrap; position:relative; z-index:1; }
+.hero-actions a{ display:inline-block; }
+.hero .btn.secondary{ background:rgba(255,241,216,.12); color:#fff1d8; border-color:rgba(255,241,216,.3); }
+.tip-card p{ font-size:13px; line-height:2; color:var(--text2); }
+.score-rules{ display:flex; gap:8px; }
+.score-rules > div{ flex:1; text-align:center; background:var(--card2); border:1px solid var(--border); border-radius:12px; padding:10px 4px; font-size:12px; color:var(--text2); }
+.score-rules b{ display:block; font-size:19px; margin-bottom:2px; }
+
+/* سکوی نفرات برتر */
+.podium{ display:flex; align-items:flex-end; justify-content:center; gap:10px; margin:8px 0 20px; }
+.podium .pod{ flex:1; max-width:150px; text-align:center; }
+.podium .pod .who{ display:flex; flex-direction:column; align-items:center; gap:6px; margin-bottom:8px; font-size:13px; font-weight:800; word-break:break-word; }
+.podium .pod .step{
+  border-radius:12px 12px 0 0; padding:10px 4px; font-weight:800; font-size:20px;
+  background:linear-gradient(180deg,var(--c1),var(--c2)); color:#fff8ea; box-shadow:var(--shadow);
+}
+.pod.p1 .step{ --c1:#e8bd5a; --c2:#a8771a; height:92px; } .pod.p2 .step{ --c1:#c9ccd3; --c2:#7d8392; height:68px; } .pod.p3 .step{ --c1:#d49a67; --c2:#8a5428; height:52px; }
+.pod.p1 .avatar{ width:58px; height:58px; font-size:30px; }
+.pod .pp{ font-size:12px; display:block; font-weight:700; opacity:.9; }
+
+/* پروفایل */
+.profile-hero{ display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
+.profile-hero .info{ flex:1; min-width:160px; }
+.profile-hero .nm{ font-size:19px; font-weight:800; }
+.profile-hero .ttl{ display:inline-block; margin-top:6px; font-size:12px; font-weight:800; color:var(--gold); background:#e3b86222; padding:4px 12px; border-radius:999px; }
+.ring{ --p:0; width:92px; height:92px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  background:conic-gradient(var(--green) calc(var(--p) * 1%), var(--card2) 0); position:relative; }
+.ring::before{ content:""; position:absolute; inset:9px; border-radius:50%; background:var(--card); }
+.ring span{ position:relative; font-weight:800; font-size:17px; text-align:center; line-height:1.3; }
+.ring small{ display:block; font-size:10px; color:var(--text2); font-weight:600; }
+.avatar-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(58px,1fr)); gap:12px; }
+.avatar-grid button{ background:none; border:3px solid transparent; border-radius:50%; padding:2px; cursor:pointer; transition:transform .12s, border-color .12s; display:flex; justify-content:center; }
+.avatar-grid button:hover{ transform:scale(1.08); }
+.avatar-grid button.sel{ border-color:var(--gold); }
+.avatar-grid .avatar{ width:46px; height:46px; font-size:24px; }
+.avatar-grid .avatar.av-emoji{ font-size:23px; }
+.mini-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:16px; }
+.mini-stats > div{ background:var(--card2); border:1px solid var(--border); border-radius:12px; padding:12px 6px; text-align:center; }
+.mini-stats b{ display:block; font-size:19px; margin-bottom:2px; }
+.mini-stats span{ font-size:11px; color:var(--text2); }
+@media(max-width:520px){ .mini-stats{ grid-template-columns:repeat(2,1fr); } .hero{ padding:18px; } }
+.mini-stats b .pts{ font-size:19px; }

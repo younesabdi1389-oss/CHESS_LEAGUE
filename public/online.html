@@ -26,11 +26,8 @@
     <div class="card" id="lobbyCard">
       <h2>شروع بازی</h2>
       <input id="nameInput" class="input" placeholder="اسمت رو بنویس" maxlength="20" style="width:100%; margin-bottom:12px">
-      <div class="timer-toggle">
-        <button id="timerOffBtn" class="active" type="button">⏱️ بدون تایمر</button>
-        <button id="timerOnBtn" type="button">⏱️ با تایمر (۱۰ دقیقه)</button>
-      </div>
-      <p class="timer-note">این انتخاب موقع «ساخت اتاق» اثر داره. نفر دوم قبل از ورود می‌بینه که بازی با تایمره یا بدون تایمر.</p>
+      <div id="timerPicker"></div>
+      <p class="timer-note">این انتخاب موقع «ساخت اتاق» اثر داره. نفر دوم قبل از ورود می‌بینه که بازی چه زمانی داره (یا بدون تایمره).</p>
       <button class="btn" id="createRoomBtn" type="button" style="width:100%; margin-bottom:14px" disabled>+ ساخت اتاق جدید</button>
       <div style="display:flex; gap:8px">
         <input id="joinCodeInput" class="input" placeholder="کد اتاق دوستت" maxlength="8" autocapitalize="characters" style="text-transform:uppercase">
@@ -121,6 +118,7 @@
   <script src="js/nav-common.js"></script>
   <script src="js/board-render.js"></script>
   <script src="js/chess-clock.js"></script>
+  <script src="js/time-picker.js"></script>
   <script src="js/sounds.js"></script>
   <script src="js/online.js"></script>
 </body>

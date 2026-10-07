@@ -16,25 +16,31 @@
     </div>
 
     <div class="card">
-      <div class="profile-card">
+      <div class="profile-hero">
         <div id="profileAvatarBox"></div>
-        <div>
-          <div id="profileNameText" style="font-size:16px; font-weight:800;">—</div>
-          <div style="font-size:12.5px; color:var(--text2); margin-top:3px;">عضو لیگ</div>
+        <div class="info">
+          <div class="nm" id="profileNameText">—</div>
+          <span class="ttl" id="profileTitle">🌱 مبتدی</span>
+          <div style="margin-top:10px; font-size:12px; color:var(--text2)">۵ نتیجه‌ی آخر: <span id="pForm">—</span></div>
         </div>
+        <div class="ring" id="winRing"><span id="pRate">0٪<small>درصد برد</small></span></div>
       </div>
-      <div class="stats-grid" style="margin-top:16px">
-        <div class="stat-card blue"><div class="num" id="pGames">-</div><div class="lbl">بازی انجام‌شده</div></div>
-        <div class="stat-card green"><div class="num" id="pWon">-</div><div class="lbl">برد</div></div>
-        <div class="stat-card gold"><div class="num" id="pPoints">-</div><div class="lbl">امتیاز</div></div>
-        <div class="stat-card purple"><div class="num" id="pRank">-</div><div class="lbl">رتبه فعلی</div></div>
+      <div class="mini-stats">
+        <div><b id="pGames">-</b><span>بازی</span></div>
+        <div><b id="pWon" class="pts-pos">-</b><span>برد</span></div>
+        <div><b id="pLost" class="pts-neg">-</b><span>باخت</span></div>
+        <div><b id="pPoints">-</b><span>امتیاز (برد +۱، باخت −۱)</span></div>
+      </div>
+      <div class="mini-stats" style="grid-template-columns:repeat(2,1fr)">
+        <div><b id="pDraw">-</b><span>مساوی</span></div>
+        <div><b id="pRank">-</b><span>رتبه‌ی فعلی</span></div>
       </div>
     </div>
 
     <div class="card">
       <h2>انتخاب آواتار</h2>
-      <p class="page-intro">یکی از این مهره‌ها رو به‌عنوان آواتارت انتخاب کن — همه‌جا (جدول امتیازات، پروفایل) همین دیده می‌شه.</p>
-      <div id="avatarPicker" style="display:flex; gap:10px; flex-wrap:wrap"></div>
+      <p class="page-intro">یکی از ۲۰ آواتار رو انتخاب کن — تو جدول امتیازات و همه‌جا همین دیده می‌شه.</p>
+      <div id="avatarPicker" class="avatar-grid"></div>
     </div>
   </main>
 
@@ -43,7 +49,7 @@
   <script src="js/avatars.js"></script>
   <script>
     const PLAYER_KEY = "cl-player-name";
-    const myName = localStorage.getItem(PLAYER_KEY) || "";
+    const myName = CLPrefs.get(PLAYER_KEY, "");
     document.getElementById("profileNameText").textContent = myName || "مهمان";
 
     function renderAvatarBox(index) {
@@ -52,10 +58,9 @@
 
     function renderPicker(selectedIndex) {
       const box = document.getElementById("avatarPicker");
-      box.innerHTML = AVATAR_PRESETS.map((a, i) => `
-        <button data-i="${i}" style="width:52px; height:52px; border-radius:50%; border:3px solid ${i === selectedIndex ? "var(--blue)" : "transparent"};
-          background:${a.color}; font-size:22px; cursor:pointer;">${a.icon}</button>
-      `).join("");
+      box.innerHTML = AVATAR_PRESETS.map((a, i) =>
+        `<button data-i="${i}" type="button" class="${i === selectedIndex ? "sel" : ""}" aria-label="آواتار ${i + 1}">${avatarHTML(i)}</button>`
+      ).join("");
       box.querySelectorAll("button").forEach((btn) => {
         btn.addEventListener("click", async () => {
           const i = parseInt(btn.dataset.i);
@@ -84,10 +89,17 @@
         if (!res.ok) throw new Error();
         const data = await res.json();
         document.getElementById("pGames").textContent = data.stats.gamesPlayed;
-        document.getElementById("pPoints").textContent = data.stats.points;
+        document.getElementById("pPoints").innerHTML = fmtPoints(data.stats.points);
         document.getElementById("pRank").textContent = data.stats.rank;
         const me = data.leagueTable.find((p) => p.isMe);
         document.getElementById("pWon").textContent = me ? me.won : 0;
+        document.getElementById("pLost").textContent = me ? me.lost : 0;
+        document.getElementById("pDraw").textContent = me ? me.draw : 0;
+        document.getElementById("pForm").innerHTML = me && me.form.length ? formDots(me.form) : "—";
+        const rate = me ? me.winRate || 0 : 0;
+        document.getElementById("winRing").style.setProperty("--p", rate);
+        document.getElementById("pRate").innerHTML = rate + '٪<small>درصد برد</small>';
+        document.getElementById("profileTitle").textContent = rankTitle(data.stats.points);
         if (data.avatar !== undefined && data.avatar !== null) {
           setSavedAvatar(data.avatar);
           renderAvatarBox(data.avatar);

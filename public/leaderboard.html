@@ -16,11 +16,23 @@
     </div>
 
     <div class="card">
+      <h2>برترین‌ها</h2>
+      <div class="podium" id="podium"></div>
+      <div class="score-rules">
+        <div><b class="pts-pos">+1</b>برد</div>
+        <div><b class="pts-zero">0</b>مساوی</div>
+        <div><b class="pts-neg">−1</b>باخت</div>
+      </div>
+    </div>
+
+    <div class="card">
       <h2>جدول کامل</h2>
+      <div style="overflow-x:auto">
       <table>
-        <thead><tr><th>#</th><th>بازیکن</th><th>بازی</th><th>برد</th><th>مساوی</th><th>باخت</th><th>امتیاز</th></tr></thead>
-        <tbody id="fullLeagueTableBody"><tr><td colspan="7">در حال بارگذاری...</td></tr></tbody>
+        <thead><tr><th>#</th><th>بازیکن</th><th>بازی</th><th>برد</th><th>مساوی</th><th>باخت</th><th>درصد برد</th><th>فرم</th><th>امتیاز</th></tr></thead>
+        <tbody id="fullLeagueTableBody"><tr><td colspan="9">در حال بارگذاری...</td></tr></tbody>
       </table>
+      </div>
     </div>
   </main>
 
@@ -30,23 +42,36 @@
   <script>
     const myName = localStorage.getItem("cl-player-name") || "";
     function rankBadge(rank){ if(rank===1) return "🥇"; if(rank===2) return "🥈"; if(rank===3) return "🥉"; return rank; }
+    function renderPodium(table) {
+      const top = table.slice(0, 3);
+      const el = document.getElementById("podium");
+      if (!top.length) { el.innerHTML = '<p class="page-intro" style="margin:0">هنوز بازی‌ای ثبت نشده.</p>'; return; }
+      // ترتیب نمایش: دوم، اول، سوم
+      const order = [top[1], top[0], top[2]].filter(Boolean);
+      el.innerHTML = order.map((r) => {
+        const cls = r.rank === 1 ? "p1" : r.rank === 2 ? "p2" : "p3";
+        return `<div class="pod ${cls}"><div class="who">${avatarHTML(r.avatar || 0)}<span>${escapeHTML(r.name)}</span><span class="pp">${fmtPoints(r.points)}</span></div><div class="step">${rankBadge(r.rank)}</div></div>`;
+      }).join("");
+    }
     async function load() {
       const body = document.getElementById("fullLeagueTableBody");
       try {
         const res = await fetch("/api/leaderboard");
         if (!res.ok) throw new Error();
         const table = await res.json();
+        renderPodium(table);
         body.innerHTML = table.length
           ? table.map((row,i) => `
             <tr class="${row.name === myName ? "me" : ""}" style="animation:fadeUp .35s ease ${i*0.05}s both">
               <td>${rankBadge(row.rank)}</td>
-              <td style="display:flex; align-items:center; gap:8px; justify-content:center">${avatarHTML(row.avatar||0,"avatar-sm")} ${row.name}</td>
+              <td style="display:flex; align-items:center; gap:8px; justify-content:center; white-space:nowrap">${avatarHTML(row.avatar||0,"avatar-sm")} ${escapeHTML(row.name)}</td>
               <td>${row.played}</td>
-              <td>${row.won}</td><td>${row.draw}</td><td>${row.lost}</td><td>${row.points}</td>
+              <td>${row.won}</td><td>${row.draw}</td><td>${row.lost}</td>
+              <td>${row.winRate || 0}٪</td><td>${formDots(row.form)}</td><td>${fmtPoints(row.points)}</td>
             </tr>`).join("")
-          : `<tr><td colspan="7" style="color:var(--text2)">هنوز هیچ بازیکن/بازی‌ای ثبت نشده</td></tr>`;
+          : `<tr><td colspan="9" style="color:var(--text2)">هنوز هیچ بازیکن/بازی‌ای ثبت نشده</td></tr>`;
       } catch (err) {
-        body.innerHTML = `<tr><td colspan="7" style="color:var(--text2)">دیتابیس هنوز وصل نیست</td></tr>`;
+        body.innerHTML = `<tr><td colspan="9" style="color:var(--text2)">دیتابیس هنوز وصل نیست</td></tr>`;
       }
     }
     load();

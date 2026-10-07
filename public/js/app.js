@@ -50,7 +50,7 @@ function renderDashboard(data) {
 
   document.getElementById("statPlayers").textContent = data.stats.players;
   document.getElementById("statGames").textContent = data.stats.gamesPlayed;
-  document.getElementById("statPoints").textContent = data.stats.points;
+  document.getElementById("statPoints").innerHTML = fmtPoints(data.stats.points);
   document.getElementById("statRank").textContent = data.stats.rank;
 
   document.getElementById("inviteLink").textContent = data.inviteLink;
@@ -69,12 +69,12 @@ function renderDashboard(data) {
           (row, i) => `
     <tr class="${row.isMe ? "me" : ""}" style="animation:fadeUp .35s ease ${i * 0.05}s both">
       <td>${rankBadge(row.rank)}</td>
-      <td style="display:flex; align-items:center; gap:8px; justify-content:center">${avatarHTML(row.avatar || 0, "avatar-sm")} ${row.name}</td>
+      <td style="display:flex; align-items:center; gap:8px; justify-content:center">${avatarHTML(row.avatar || 0, "avatar-sm")} ${escapeHTML(row.name)}</td>
       <td>${row.played}</td>
       <td>${row.won}</td>
       <td>${row.draw}</td>
       <td>${row.lost}</td>
-      <td>${row.points}</td>
+      <td>${fmtPoints(row.points)}</td>
     </tr>`
         )
         .join("")
@@ -86,8 +86,8 @@ function renderDashboard(data) {
         .map(
           (g) => `
     <div class="game-row">
-      <span>${g.players}</span>
-      <span class="result ${g.type}">${g.result}</span>
+      <span>${escapeHTML(g.players)}</span>
+      <span class="result ${g.type}">${escapeHTML(g.result)}</span>
     </div>`
         )
         .join("")
@@ -116,3 +116,24 @@ document.getElementById("copyInviteBtn").addEventListener("click", () => {
 });
 
 loadDashboardData();
+
+
+// ---------- نکته‌ی روز (هر روز یکی، بدون نیاز به سرور) ----------
+const TIPS = [
+  "مرکز تخته (e4, d4, e5, d5) رو زود کنترل کن؛ مهره‌هات اونجا قدرت بیشتری دارن.",
+  "اسب‌ها و فیل‌ها رو قبل از وزیر و رخ‌ها بازی بده (توسعه‌ی مهره‌ها).",
+  "قبل از هر حرکت بپرس: حریف با این حرکت چه تهدیدی می‌تونه بسازه؟",
+  "زود قلعه‌روی کن تا شاهت امن باشه و رخ‌ها وارد بازی بشن.",
+  "وزیر رو خیلی زود وارد بازی نکن؛ با حمله‌ی مهره‌های کوچیک‌تر وقت از دست می‌دی.",
+  "در پایان بازی، شاه یه مهره‌ی قدرتمنده؛ بیارش وسط تخته.",
+  "یه رخ روی ستون باز، خیلی قوی‌تر از رخ پشت سربازهاست.",
+  "اگه از نظر مادی جلویی، معامله‌ی مهره‌ها به نفعته.",
+  "سربازها نمی‌تونن عقب برن؛ هر حرکتشون رو با دقت انتخاب کن.",
+  "بعد از هر حرکت حریف، اول ببین چی رو تهدید می‌کنه، بعد نقشه‌ی خودت رو ادامه بده.",
+];
+(function showTip() {
+  const el = document.getElementById("tipText");
+  if (!el) return;
+  const day = Math.floor(Date.now() / 86400000);
+  el.textContent = TIPS[day % TIPS.length];
+})();

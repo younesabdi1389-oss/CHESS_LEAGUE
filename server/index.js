@@ -92,7 +92,7 @@ setInterval(() => {
 app.post("/api/players", requireDb, rateLimitWrites(30), async (req, res) => {
   try {
     const name = rm.cleanText(req.body.name, 20);
-    const avatar = Number.isInteger(req.body.avatar) && req.body.avatar >= 0 && req.body.avatar < 8 ? req.body.avatar : undefined;
+    const avatar = Number.isInteger(req.body.avatar) && req.body.avatar >= 0 && req.body.avatar < 20 ? req.body.avatar : undefined;
     const player = await queries.findOrCreatePlayer(name, avatar);
     res.json(player);
   } catch (err) {
@@ -185,6 +185,8 @@ function roomState(room, color) {
     history: room.game.history(),
     status: room.status,
     withTimer: room.withTimer,
+    minutes: room.minutes,
+    inc: room.inc,
     timeLeft: rm.liveTimeLeft(room),
     whiteName: room.white.name,
     blackName: room.black ? room.black.name : null,
@@ -280,10 +282,10 @@ io.on("connection", (socket) => {
     const room = rm.rooms.get(String(code || "").toUpperCase().trim());
     if (!room || room.status === "over") return socket.emit("room_error", { message: "اتاقی با این کد پیدا نشد." });
     if (room.black) return socket.emit("room_error", { message: "این اتاق پره." });
-    socket.emit("room_preview", { code: room.code, withTimer: room.withTimer, hostName: room.white.name });
+    socket.emit("room_preview", { code: room.code, withTimer: room.withTimer, minutes: room.minutes, inc: room.inc, hostName: room.white.name });
   });
 
-  safe(socket, "create_room", ({ playerId, name, withTimer }) => {
+  safe(socket, "create_room", ({ playerId, name, withTimer, minutes, inc }) => {
     if (!rm.isValidPlayerId(playerId)) return socket.emit("room_error", { message: "شناسه‌ی بازیکن نامعتبره؛ صفحه رو رفرش کن." });
     if (Date.now() - lastAction.create < 800) return;
     lastAction.create = Date.now();
@@ -297,7 +299,7 @@ io.on("connection", (socket) => {
     }
     if (existing) rm.removeRoom(existing.code);
 
-    const room = rm.createRoom(playerId, socket.id, rm.cleanName(name), !!withTimer);
+    const room = rm.createRoom(playerId, socket.id, rm.cleanName(name), !!withTimer, minutes, inc);
     attachSeat(socket, room, room.white);
     room.cleanupTimer = setTimeout(() => {
       if (room.status === "waiting") {
@@ -374,6 +376,7 @@ io.on("connection", (socket) => {
     const move = room.game.move({ from, to, promotion: promo });
     if (!move) return socket.emit("move_rejected", { message: "این حرکت مجاز نیست." });
 
+    if (room.withTimer) room.timeLeft[color] += room.inc * 1000; // جایزه‌ی زمانی بعد از حرکت
     room.lastMove = { from: move.from, to: move.to, captured: !!move.captured, san: move.san };
     io.to(room.code).emit("move_made", {
       fen: room.game.fen(),

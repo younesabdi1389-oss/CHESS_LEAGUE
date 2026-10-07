@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>تنظیمات | Chess League</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/game.css">
 </head>
 <body>
   <main class="main">
@@ -24,9 +25,7 @@
     <div class="card">
       <h2>تایمر پیش‌فرض بازی</h2>
       <p class="page-intro">انتخابت تو صفحه‌ی بازی محلی و ساخت اتاق آنلاین هم اعمال می‌شه.</p>
-      <div class="setting-row" style="border:none; padding:0">
-        <button class="btn secondary" id="timerPrefBtn" type="button">—</button>
-      </div>
+      <div id="timerPicker"></div>
     </div>
 
     <div class="card">
@@ -45,17 +44,10 @@
   <script src="js/theme.js"></script>
   <script src="js/nav-common.js"></script>
   <script src="js/sounds.js"></script>
+  <script src="js/time-picker.js"></script>
   <script src="js/music.js"></script>
   <script>
-    const timerPrefBtn = document.getElementById("timerPrefBtn");
-    function paintTimerPref() {
-      timerPrefBtn.textContent = CLPrefs.get("cl-timer-pref", "0") === "1" ? "⏱️ با تایمر (۱۰ دقیقه)" : "⏱️ بدون تایمر";
-    }
-    timerPrefBtn.addEventListener("click", () => {
-      CLPrefs.set("cl-timer-pref", CLPrefs.get("cl-timer-pref", "0") === "1" ? "0" : "1");
-      paintTimerPref();
-    });
-    paintTimerPref();
+    createTimePicker(document.getElementById("timerPicker"));
     document.getElementById("themeToggleBtnSettings").addEventListener("click", () => {
       document.getElementById("themeToggleBtn").click();
     });
